@@ -2,9 +2,9 @@
 
 > Developer-first CLI scanner for unsafe `.env`, Docker, config, and CI/CD settings.
 
-![npm](https://img.shields.io/npm/v/envguard)
-![CI](https://img.shields.io/github/actions/workflow/status/your-username/envguard/test.yml)
-![License](https://img.shields.io/github/license/your-username/envguard)
+[![npm](https://img.shields.io/npm/v/envguard)](https://www.npmjs.com/package/envguard)
+[![CI](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml/badge.svg)](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 EnvGuard helps developers catch leaked secrets, weak environment values, unsafe Docker defaults, and risky GitHub Actions patterns before they reach production.
@@ -122,12 +122,12 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 
 ## Documentation
 
-- [Rule catalog](docs/rules.md)
-- [Remediation guide](docs/remediation.md)
-- [GitHub Actions setup](docs/ci.md)
-- [Pre-commit setup](docs/pre-commit.md)
-- [Design notes](docs/design.md)
-- [Roadmap](docs/roadmap.md)
+- [Rule catalog](https://github.com/bhargavmahanta/envGuard/blob/main/docs/rules.md)
+- [Remediation guide](https://github.com/bhargavmahanta/envGuard/blob/main/docs/remediation.md)
+- [GitHub Actions setup](https://github.com/bhargavmahanta/envGuard/blob/main/docs/ci.md)
+- [Pre-commit setup](https://github.com/bhargavmahanta/envGuard/blob/main/docs/pre-commit.md)
+- [Design notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/design.md)
+- [Roadmap](https://github.com/bhargavmahanta/envGuard/blob/main/docs/roadmap.md)
 
 ## License
 
