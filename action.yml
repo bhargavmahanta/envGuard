@@ -1,0 +1,33 @@
+name: EnvGuard
+description: Scan unsafe env, Docker, config, and CI/CD settings with EnvGuard.
+author: Bhargav Mahanta
+
+inputs:
+  target:
+    description: File or directory to scan.
+    required: false
+    default: .
+  fail-on:
+    description: Severity threshold for failing the workflow.
+    required: false
+    default: high
+  format:
+    description: Report format: terminal, json, markdown, or sarif.
+    required: false
+    default: terminal
+  output:
+    description: Optional report output path.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Run EnvGuard
+      shell: bash
+      run: |
+        args=("scan" "${{ inputs.target }}" "--ci" "--fail-on" "${{ inputs.fail-on }}" "--format" "${{ inputs.format }}")
+        if [ -n "${{ inputs.output }}" ]; then
+          args+=("--output" "${{ inputs.output }}")
+        fi
+        npx --yes @bhargavmahanta/envguard "${args[@]}"

@@ -16,6 +16,7 @@ EnvGuard helps developers catch leaked secrets, weak environment values, unsafe 
 - Detect Docker and CI/CD security issues
 - Mask secrets by default in terminal, JSON, and Markdown reports
 - Support local CLI usage, pre-commit hooks, and GitHub Actions
+- Use the included reusable GitHub Action wrapper
 - Configure behavior with `envguard.config.yml` and `.envguardignore`
 
 ## Installation

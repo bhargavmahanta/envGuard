@@ -2,6 +2,32 @@
 
 Run EnvGuard in CI to fail pull requests when high-risk configuration issues appear.
 
+## Reusable GitHub Action
+
+```yaml
+name: EnvGuard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  envguard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bhargavmahanta/envGuard@main
+        with:
+          target: .
+          fail-on: high
+```
+
+## npx Setup
+
 ```yaml
 name: EnvGuard
 
