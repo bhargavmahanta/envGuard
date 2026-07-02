@@ -2,7 +2,7 @@
 
 > Developer-first CLI scanner for unsafe `.env`, Docker, config, and CI/CD settings.
 
-[![npm](https://img.shields.io/npm/v/envguard)](https://www.npmjs.com/package/envguard)
+[![npm](https://img.shields.io/npm/v/@bhargavmahanta/envguard)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
 [![CI](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml/badge.svg)](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
@@ -21,13 +21,13 @@ EnvGuard helps developers catch leaked secrets, weak environment values, unsafe 
 ## Installation
 
 ```bash
-npx envguard scan .
+npx @bhargavmahanta/envguard scan .
 ```
 
 Or install globally:
 
 ```bash
-npm install -g envguard
+npm install -g @bhargavmahanta/envguard
 ```
 
 ## Quick Start

@@ -24,17 +24,17 @@ jobs:
         with:
           node-version: 20
 
-      - run: npx envguard scan . --ci --fail-on high
+      - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
 Generate a JSON report:
 
 ```bash
-npx envguard scan . --format json --output envguard-report.json
+npx @bhargavmahanta/envguard scan . --format json --output envguard-report.json
 ```
 
 Generate a Markdown report:
 
 ```bash
-npx envguard scan . --format markdown --output envguard-report.md
+npx @bhargavmahanta/envguard scan . --format markdown --output envguard-report.md
 ```

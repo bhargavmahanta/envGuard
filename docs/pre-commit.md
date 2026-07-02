@@ -12,7 +12,7 @@ npx husky init
 Add this to `.husky/pre-commit`:
 
 ```bash
-npx envguard scan . --ci --fail-on high
+npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
 ## npm Script

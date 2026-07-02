@@ -1,5 +1,5 @@
 {
-  "name": "envguard",
+  "name": "@bhargavmahanta/envguard",
   "version": "0.1.0",
   "description": "Developer-first CLI scanner for unsafe env, Docker, config, and CI/CD settings.",
   "type": "module",
