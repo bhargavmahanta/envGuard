@@ -1,0 +1,47 @@
+import path from 'node:path';
+
+export function normalizePath(filePath: string): string {
+  return filePath.replace(/\\/g, '/');
+}
+
+export function relativeNormalized(root: string, absolutePath: string): string {
+  return normalizePath(path.relative(root, absolutePath));
+}
+
+export function isExampleTemplatePath(filePath: string): boolean {
+  const normalized = normalizePath(filePath).toLowerCase();
+  return (
+    normalized.endsWith('.env.example') ||
+    normalized.endsWith('.env.sample') ||
+    normalized.endsWith('.env.template') ||
+    normalized.includes('/fixtures/')
+  );
+}
+
+export function isProductionPath(filePath: string): boolean {
+  const normalized = normalizePath(filePath).toLowerCase();
+  return (
+    normalized.includes('production') ||
+    normalized.includes('prod') ||
+    normalized.endsWith('.env')
+  );
+}
+
+export function lineNumberForIndex(content: string, index: number): number {
+  return content.slice(0, index).split(/\r?\n/).length;
+}
+
+export function isDockerfilePath(filePath: string): boolean {
+  const base = path.posix.basename(normalizePath(filePath));
+  return base === 'Dockerfile' || base.startsWith('Dockerfile.');
+}
+
+export function isComposePath(filePath: string): boolean {
+  const normalized = normalizePath(filePath).toLowerCase();
+  return normalized.endsWith('docker-compose.yml') || normalized.endsWith('docker-compose.yaml');
+}
+
+export function isGithubWorkflowPath(filePath: string): boolean {
+  const normalized = normalizePath(filePath).toLowerCase();
+  return normalized.includes('.github/workflows/') && /\.(ya?ml)$/.test(normalized);
+}

@@ -1,0 +1,38 @@
+# Roadmap
+
+## v0.1.0
+
+- CLI scanner
+- Env, Docker, Compose, GitHub Actions, and config scanning
+- Terminal, JSON, and Markdown reports
+- Config and ignore support
+- Sample vulnerable project
+- Test suite
+
+## v0.2.0
+
+- More secret patterns
+- Better YAML-aware Compose and workflow analysis
+- Improved false-positive suppression
+- Reusable GitHub Action wrapper
+
+## v0.3.0
+
+- SARIF output
+- Baseline suppression file
+- Custom rule packs
+- GitLab CI support
+
+## v1.0.0
+
+- Stable rule engine API
+- Public npm release
+- Expanded documentation and examples
+
+## Later
+
+- VS Code extension
+- Docker image
+- Framework presets
+- Monorepo support
+- Optional secret validation disabled by default

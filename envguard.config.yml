@@ -1,0 +1,16 @@
+severity:
+  fail_on: high
+
+entropy:
+  enabled: true
+  threshold: 4.2
+
+output:
+  mask: true
+
+rules:
+  disabled: []
+
+exclude:
+  - examples/vulnerable-project/
+  - docs/fixtures/

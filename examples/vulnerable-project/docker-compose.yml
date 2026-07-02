@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:latest
+    privileged: true
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: inlineComposePassword123
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
