@@ -60,9 +60,16 @@ export async function loadConfig(cwd: string): Promise<LoadedConfig> {
       continue;
     }
 
-    const parsed = ConfigSchema.parse(await readConfigFile(candidate));
+    const parsed = ConfigSchema.safeParse(await readConfigFile(candidate));
+    if (!parsed.success) {
+      const details = parsed.error.issues
+        .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
+        .join('; ');
+      throw new Error(`Invalid EnvGuard config at ${candidate}: ${details}`);
+    }
+
     return {
-      config: mergeConfig(parsed),
+      config: mergeConfig(parsed.data),
       configPath: candidate
     };
   }

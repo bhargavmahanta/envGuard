@@ -162,6 +162,10 @@ function makeFinding(
     return undefined;
   }
 
+  if (isInlineSuppressed(file, line, ruleId)) {
+    return undefined;
+  }
+
   const rule = getRule(ruleId);
   let severity = override.severity ?? rule.severity;
   let confidence = override.confidence ?? rule.confidence;
@@ -177,6 +181,7 @@ function makeFinding(
 
   return {
     id: '',
+    fingerprint: '',
     ruleId,
     title: rule.title,
     category: rule.category,
@@ -194,6 +199,36 @@ function makeFinding(
     message: override.message ?? rule.description,
     fix: override.fix ?? rule.fix
   };
+}
+
+function suppressionMatches(comment: string, ruleId: string): boolean {
+  const match = comment.match(/envguard-disable-(?:next-line|line)(?:\s+([A-Za-z0-9_,.-]+))?/);
+  if (!match) {
+    return false;
+  }
+
+  if (!match[1]) {
+    return true;
+  }
+
+  return match[1]
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .includes(ruleId);
+}
+
+function isInlineSuppressed(file: ScannedFile, line: number, ruleId: string): boolean {
+  const sameLine = file.lines[line - 1] ?? '';
+  const previousLine = file.lines[line - 2] ?? '';
+
+  return (
+    /envguard-disable-line/.test(sameLine) &&
+    suppressionMatches(sameLine, ruleId)
+  ) || (
+    /envguard-disable-next-line/.test(previousLine) &&
+    suppressionMatches(previousLine, ruleId)
+  );
 }
 
 function pushFinding(findings: Finding[], finding: Finding | undefined): void {

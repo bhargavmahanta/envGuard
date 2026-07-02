@@ -4,7 +4,7 @@ export type Severity = (typeof SEVERITIES)[number];
 export const CONFIDENCES = ['low', 'medium', 'high'] as const;
 export type Confidence = (typeof CONFIDENCES)[number];
 
-export type OutputFormat = 'terminal' | 'json' | 'markdown';
+export type OutputFormat = 'terminal' | 'json' | 'markdown' | 'sarif';
 
 export type DetectionCategory =
   | 'secret'
@@ -52,6 +52,7 @@ export interface RuleMeta {
 
 export interface Finding {
   id: string;
+  fingerprint: string;
   ruleId: string;
   title: string;
   category: DetectionCategory;
@@ -84,6 +85,8 @@ export interface ScannedFile {
 
 export interface ScanOptions {
   cwd?: string;
+  baselinePath?: string;
+  useBaseline?: boolean;
 }
 
 export interface ScanSummary {
@@ -96,11 +99,25 @@ export interface ScanSummary {
 export interface ScanResult {
   tool: 'envguard';
   version: string;
+  schemaVersion: '1.0.0';
   targetPath: string;
   generatedAt: string;
   configPath?: string;
   summary: ScanSummary;
   findings: Finding[];
+}
+
+export interface BaselineFile {
+  tool: 'envguard';
+  schemaVersion: '1.0.0';
+  generatedAt: string;
+  findings: Array<{
+    fingerprint: string;
+    ruleId: string;
+    filePath: string;
+    line: number;
+    title: string;
+  }>;
 }
 
 export const SEVERITY_RANK: Record<Severity, number> = {

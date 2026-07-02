@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
-import { DEFAULT_CONFIG, VERSION } from './defaults.js';
+import { applyBaseline, defaultBaselinePath, findingFingerprint, loadBaseline } from './baseline.js';
+import { DEFAULT_CONFIG, REPORT_SCHEMA_VERSION, VERSION } from './defaults.js';
 import { loadConfig } from './config.js';
 import { dedupeFindings } from './dedupe.js';
 import { detectFindings } from './detector.js';
@@ -80,17 +81,29 @@ export async function scan(targetPath: string, options: ScanOptions = {}): Promi
     .sort(sortFindings)
     .map((finding, index) => ({
       ...finding,
+      fingerprint: findingFingerprint(finding),
       id: `ENV-${String(index + 1).padStart(3, '0')}`
     }));
+
+  const baselinePath = options.baselinePath ?? defaultBaselinePath(cwd);
+  const baselineFingerprints =
+    options.useBaseline === false ? new Set<string>() : await loadBaseline(baselinePath);
+  const visibleFindings = applyBaseline(sortedFindings, baselineFingerprints).map(
+    (finding, index) => ({
+      ...finding,
+      id: `ENV-${String(index + 1).padStart(3, '0')}`
+    })
+  );
 
   return {
     tool: 'envguard',
     version: VERSION,
+    schemaVersion: REPORT_SCHEMA_VERSION,
     targetPath,
     generatedAt: new Date().toISOString(),
     configPath: loaded.configPath,
-    summary: summarize(sortedFindings, files.length),
-    findings: sortedFindings
+    summary: summarize(visibleFindings, files.length),
+    findings: visibleFindings
   };
 }
 

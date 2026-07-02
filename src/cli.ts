@@ -4,6 +4,7 @@ import path from 'node:path';
 import chalk from 'chalk';
 import { Command, InvalidArgumentError } from 'commander';
 import ora from 'ora';
+import { defaultBaselinePath, writeBaseline } from './baseline.js';
 import { VERSION } from './defaults.js';
 import { loadConfig } from './config.js';
 import { RULES } from './rules/catalog.js';
@@ -12,11 +13,11 @@ import { scan, shouldFail } from './scanner.js';
 import { SEVERITIES, type OutputFormat, type Severity } from './types.js';
 
 function parseFormat(value: string): OutputFormat {
-  if (value === 'terminal' || value === 'json' || value === 'markdown') {
+  if (value === 'terminal' || value === 'json' || value === 'markdown' || value === 'sarif') {
     return value;
   }
 
-  throw new InvalidArgumentError('format must be one of terminal, json, markdown');
+  throw new InvalidArgumentError('format must be one of terminal, json, markdown, sarif');
 }
 
 function parseSeverity(value: string): Severity {
@@ -82,6 +83,11 @@ program
   .option('-o, --output <path>', 'write the report to a file')
   .option('--ci', 'enable CI mode with non-zero exit on configured severity')
   .option('--fail-on <severity>', 'CI failure threshold', parseSeverity)
+  .option('--baseline <path>', 'path to baseline file', '.envguard-baseline.json')
+  .option('--update-baseline', 'write the current findings to the baseline file')
+  .option('--no-color', 'disable colored terminal output')
+  .option('--quiet', 'suppress non-error output')
+  .option('--verbose', 'print extra diagnostic details')
   .action(
     async (
       target: string,
@@ -90,23 +96,52 @@ program
         output?: string;
         ci?: boolean;
         failOn?: Severity;
+        updateBaseline?: boolean;
+        baseline?: string;
+        color?: boolean;
+        quiet?: boolean;
+        verbose?: boolean;
       }
     ) => {
-      const useSpinner = options.format === 'terminal' && !options.output && process.stdout.isTTY;
+      if (options.color === false) {
+        process.env.NO_COLOR = '1';
+      }
+
+      const useSpinner =
+        !options.quiet &&
+        options.format === 'terminal' &&
+        !options.output &&
+        process.stdout.isTTY;
       const spinner = useSpinner ? ora('Scanning project configuration...').start() : undefined;
 
       try {
         const loaded = await loadConfig(process.cwd());
-        const result = await scan(target);
+        const baselinePath = path.resolve(options.baseline ?? defaultBaselinePath(process.cwd()));
+        const result = await scan(target, {
+          baselinePath,
+          useBaseline: !options.updateBaseline
+        });
         const output = renderReport(result, options.format);
 
         spinner?.succeed('Scan complete');
 
-        if (options.output) {
+        if (options.updateBaseline) {
+          await writeBaseline(baselinePath, result.findings);
+          if (!options.quiet) {
+            console.log(chalk.green(`Baseline written to ${baselinePath}`));
+          }
+        } else if (options.output) {
           await writeOutput(options.output, output);
-          console.log(chalk.green(`Report written to ${options.output}`));
-        } else {
+          if (!options.quiet) {
+            console.log(chalk.green(`Report written to ${options.output}`));
+          }
+        } else if (!options.quiet) {
           console.log(output);
+        }
+
+        if (options.verbose && !options.quiet) {
+          console.error(chalk.gray(`Baseline: ${baselinePath}`));
+          console.error(chalk.gray(`Findings after baseline: ${result.summary.findings}`));
         }
 
         const failOn = options.failOn ?? loaded.config.severity.fail_on;
@@ -117,7 +152,8 @@ program
         spinner?.fail('Scan failed');
         const message = error instanceof Error ? error.message : String(error);
         console.error(chalk.red(message));
-        process.exitCode = 1;
+        process.exitCode =
+          error instanceof InvalidArgumentError || message.startsWith('Invalid EnvGuard config') ? 2 : 1;
       }
     }
   );

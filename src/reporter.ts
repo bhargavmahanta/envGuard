@@ -58,6 +58,89 @@ export function renderJsonReport(result: ScanResult): string {
   return `${JSON.stringify(result, null, 2)}\n`;
 }
 
+function sarifLevel(severity: Finding['severity']): 'error' | 'warning' | 'note' {
+  if (severity === 'critical' || severity === 'high') {
+    return 'error';
+  }
+
+  if (severity === 'medium' || severity === 'low') {
+    return 'warning';
+  }
+
+  return 'note';
+}
+
+export function renderSarifReport(result: ScanResult): string {
+  const rules = new Map<string, Finding>();
+  for (const finding of result.findings) {
+    if (!rules.has(finding.ruleId)) {
+      rules.set(finding.ruleId, finding);
+    }
+  }
+
+  const sarif = {
+    version: '2.1.0',
+    $schema: 'https://json.schemastore.org/sarif-2.1.0.json',
+    runs: [
+      {
+        tool: {
+          driver: {
+            name: 'EnvGuard',
+            informationUri: 'https://github.com/bhargavmahanta/envGuard',
+            version: result.version,
+            rules: [...rules.values()].map((finding) => ({
+              id: finding.ruleId,
+              name: finding.title,
+              shortDescription: {
+                text: finding.title
+              },
+              fullDescription: {
+                text: finding.message
+              },
+              help: {
+                text: finding.fix
+              },
+              defaultConfiguration: {
+                level: sarifLevel(finding.severity)
+              }
+            }))
+          }
+        },
+        results: result.findings.map((finding) => ({
+          ruleId: finding.ruleId,
+          level: sarifLevel(finding.severity),
+          message: {
+            text: `${finding.title}: ${finding.fix}`
+          },
+          partialFingerprints: {
+            envguardFingerprint: finding.fingerprint
+          },
+          locations: [
+            {
+              physicalLocation: {
+                artifactLocation: {
+                  uri: finding.filePath
+                },
+                region: {
+                  startLine: finding.line
+                }
+              }
+            }
+          ],
+          properties: {
+            severity: finding.severity,
+            confidence: finding.confidence,
+            riskScore: finding.riskScore,
+            preview: finding.preview
+          }
+        }))
+      }
+    ]
+  };
+
+  return `${JSON.stringify(sarif, null, 2)}\n`;
+}
+
 export function renderMarkdownReport(result: ScanResult): string {
   const lines = [
     '# EnvGuard Report',
@@ -109,6 +192,10 @@ export function renderReport(result: ScanResult, format: OutputFormat): string {
 
   if (format === 'markdown') {
     return renderMarkdownReport(result);
+  }
+
+  if (format === 'sarif') {
+    return renderSarifReport(result);
   }
 
   return renderTerminalReport(result);
