@@ -1,0 +1,25 @@
+name: False positive
+description: Report a finding that should not be flagged.
+title: "[False positive]: "
+labels: ["false-positive"]
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: Rule ID
+      placeholder: generic-api-key
+    validations:
+      required: true
+  - type: textarea
+    id: safe-example
+    attributes:
+      label: Safe example
+      description: Share a redacted or synthetic example. Do not paste real secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Why this is safe
+    validations:
+      required: true
