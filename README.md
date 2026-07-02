@@ -14,7 +14,7 @@ EnvGuard helps developers catch leaked secrets, weak environment values, unsafe 
 - Scan `.env`, config, Docker, Compose, and GitHub Actions files
 - Detect real-looking secrets, weak secrets, unsafe runtime settings, and wildcard CORS
 - Detect Docker and CI/CD security issues
-- Mask secrets by default in terminal, JSON, and Markdown reports
+- Mask secrets by default in terminal, JSON, Markdown, and SARIF reports
 - Support local CLI usage, pre-commit hooks, and GitHub Actions
 - Use the included reusable GitHub Action wrapper
 - Configure behavior with `envguard.config.yml` and `.envguardignore`
@@ -112,6 +112,7 @@ EnvGuard supports:
 terminal
 json
 markdown
+sarif
 ```
 
 ## Sample Vulnerable Project
@@ -135,6 +136,7 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [GitHub Actions setup](https://github.com/bhargavmahanta/envGuard/blob/main/docs/ci.md)
 - [Pre-commit setup](https://github.com/bhargavmahanta/envGuard/blob/main/docs/pre-commit.md)
 - [Integration examples](https://github.com/bhargavmahanta/envGuard/blob/main/docs/examples.md)
+- [Reporting](https://github.com/bhargavmahanta/envGuard/blob/main/docs/reporting.md)
 - [Release process](https://github.com/bhargavmahanta/envGuard/blob/main/docs/releasing.md)
 - [Compatibility](https://github.com/bhargavmahanta/envGuard/blob/main/docs/compatibility.md)
 - [Design notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/design.md)
