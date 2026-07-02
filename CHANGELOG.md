@@ -4,11 +4,27 @@ All notable changes to EnvGuard are documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style sections and uses semantic versioning.
 
-## Unreleased
+## 1.0.0
 
 ### Added
 
-- V1.0 hardening roadmap implementation is in progress.
+- Added stable CLI contract docs for `scan`, `init`, `rules`, and `doctor`.
+- Added stable JSON report schema version `1.0.0`.
+- Added SARIF output for GitHub code scanning.
+- Added baseline suppression with `.envguard-baseline.json`.
+- Added inline suppression comments with `envguard-disable-next-line` and `envguard-disable-line`.
+- Added reusable GitHub Action wrapper.
+- Added release workflow, issue templates, PR template, and release docs.
+- Added compatibility, reporting, examples, public API, and V1 readiness docs.
+
+### Changed
+
+- Hardened npm package metadata and release dry-run workflow.
+- Expanded CI compatibility checks across Ubuntu, Windows, and macOS.
+
+### Security
+
+- Continued to mask detected sensitive values in all report formats by default.
 
 ## 0.1.0
 

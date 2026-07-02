@@ -139,6 +139,7 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [Reporting](https://github.com/bhargavmahanta/envGuard/blob/main/docs/reporting.md)
 - [Public API surface](https://github.com/bhargavmahanta/envGuard/blob/main/docs/public-api.md)
 - [Release process](https://github.com/bhargavmahanta/envGuard/blob/main/docs/releasing.md)
+- [V1.0 release notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/release-notes-v1.md)
 - [V1.0 readiness](https://github.com/bhargavmahanta/envGuard/blob/main/docs/v1-readiness.md)
 - [Compatibility](https://github.com/bhargavmahanta/envGuard/blob/main/docs/compatibility.md)
 - [Design notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/design.md)
