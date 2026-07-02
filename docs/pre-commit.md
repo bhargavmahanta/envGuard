@@ -15,6 +15,12 @@ Add this to `.husky/pre-commit`:
 npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
+On Windows PowerShell, use:
+
+```powershell
+npx --package @bhargavmahanta/envguard envguard.cmd scan . --ci --fail-on high
+```
+
 ## npm Script
 
 ```json

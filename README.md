@@ -42,6 +42,13 @@ envguard rules
 envguard doctor
 ```
 
+On Windows PowerShell, if script execution blocks the generated `envguard.ps1` shim, use the `.cmd` shim:
+
+```powershell
+envguard.cmd scan .
+npx --package @bhargavmahanta/envguard envguard.cmd scan .
+```
+
 ## Example Output
 
 ```text

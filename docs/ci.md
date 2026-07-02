@@ -38,3 +38,9 @@ Generate a Markdown report:
 ```bash
 npx @bhargavmahanta/envguard scan . --format markdown --output envguard-report.md
 ```
+
+On Windows PowerShell, use the `.cmd` shim if script execution blocks `envguard.ps1`:
+
+```powershell
+npx --package @bhargavmahanta/envguard envguard.cmd scan . --ci --fail-on high
+```
