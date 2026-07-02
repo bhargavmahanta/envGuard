@@ -2,6 +2,8 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { writeBaseline } from '../src/baseline.js';
+import { renderReport } from '../src/reporter.js';
 import { scan, shouldFail } from '../src/scanner.js';
 
 let tmpDir: string;
@@ -87,5 +89,50 @@ describe('scanner', () => {
     expect(ruleIds).toContain('actions-missing-permissions');
     expect(serialized).not.toContain('supersecret');
     expect(shouldFail(result, 'high')).toBe(true);
+    expect(result.schemaVersion).toBe('1.0.0');
+    expect(result.findings.every((finding) => finding.fingerprint.length > 0)).toBe(true);
+  });
+
+  it('respects inline suppression comments', async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'envguard-'));
+    await writeFixture(
+      '.env',
+      [
+        '# envguard-disable-next-line weak-jwt-secret',
+        'JWT_SECRET=secret',
+        'SESSION_SECRET=password # envguard-disable-line weak-session-secret'
+      ].join('\n')
+    );
+
+    const result = await scan('.', { cwd: tmpDir });
+    const ruleIds = new Set(result.findings.map((finding) => finding.ruleId));
+
+    expect(ruleIds).not.toContain('weak-jwt-secret');
+    expect(ruleIds).not.toContain('weak-session-secret');
+  });
+
+  it('suppresses findings present in a baseline', async () => {
+    const firstScan = await scan('.', { cwd: tmpDir, useBaseline: false });
+    const baselinePath = path.join(tmpDir, '.envguard-baseline.json');
+    await writeBaseline(baselinePath, firstScan.findings);
+
+    const secondScan = await scan('.', { cwd: tmpDir });
+
+    expect(firstScan.findings.length).toBeGreaterThan(0);
+    expect(secondScan.findings).toHaveLength(0);
+  });
+
+  it('renders SARIF with masked previews', async () => {
+    const result = await scan('.', { cwd: tmpDir, useBaseline: false });
+    const sarif = JSON.parse(renderReport(result, 'sarif')) as {
+      version: string;
+      runs: Array<{ results: Array<{ properties: { preview: string } }> }>;
+    };
+    const serialized = JSON.stringify(sarif);
+
+    expect(sarif.version).toBe('2.1.0');
+    expect(sarif.runs[0].results.length).toBeGreaterThan(0);
+    expect(serialized).not.toContain('supersecret');
   });
 });
