@@ -28,6 +28,10 @@
 - Stable rule engine API
 - Public npm release
 - Expanded documentation and examples
+- Stable CLI commands and report schema
+- SARIF output for code scanning
+- Baseline and inline suppression support
+- Public GitHub repository when ready for launch
 
 ## Later
 
