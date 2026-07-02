@@ -6,6 +6,13 @@
   "author": "Bhargav Mahanta",
   "license": "MIT",
   "homepage": "https://github.com/bhargavmahanta/envGuard#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/bhargavmahanta"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bhargavmahanta/envGuard.git"
@@ -29,7 +36,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "security:env": "tsx src/cli.ts scan . --ci --fail-on high"
+    "security:env": "tsx src/cli.ts scan . --ci --fail-on high",
+    "release:dry": "npm run typecheck && npm run lint && npm test && npm audit && npm run build && npm pack --dry-run && npm publish --dry-run --access public"
   },
   "keywords": [
     "security",
