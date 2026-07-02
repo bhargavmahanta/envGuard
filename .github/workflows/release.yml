@@ -23,8 +23,6 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run release:dry
-
       - id: package
         shell: bash
         run: |
@@ -35,6 +33,12 @@ jobs:
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - if: steps.package.outputs.published == 'true'
+        run: npm run typecheck && npm run lint && npm test && npm audit && npm run build && npm pack --dry-run
+
+      - if: steps.package.outputs.published == 'false'
+        run: npm run release:dry
 
       - if: steps.package.outputs.published == 'false'
         run: npm publish --provenance --access public
