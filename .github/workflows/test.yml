@@ -10,7 +10,12 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -31,3 +36,6 @@ jobs:
 
       - name: Run sample scan
         run: node dist/cli.js scan examples/vulnerable-project --format json --output sample-report.json
+
+      - name: Check npm package contents
+        run: npm pack --dry-run

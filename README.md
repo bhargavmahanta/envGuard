@@ -136,6 +136,7 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [Pre-commit setup](https://github.com/bhargavmahanta/envGuard/blob/main/docs/pre-commit.md)
 - [Integration examples](https://github.com/bhargavmahanta/envGuard/blob/main/docs/examples.md)
 - [Release process](https://github.com/bhargavmahanta/envGuard/blob/main/docs/releasing.md)
+- [Compatibility](https://github.com/bhargavmahanta/envGuard/blob/main/docs/compatibility.md)
 - [Design notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/design.md)
 - [Roadmap](https://github.com/bhargavmahanta/envGuard/blob/main/docs/roadmap.md)
 
