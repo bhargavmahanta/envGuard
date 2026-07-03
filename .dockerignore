@@ -1,7 +1,11 @@
-.env
-.env.*
 .git
 node_modules
-coverage
 dist
-build
+coverage
+.release-smoke
+.registry-smoke
+npm-debug.log*
+*.tgz
+.env
+.env.*
+!.env.example

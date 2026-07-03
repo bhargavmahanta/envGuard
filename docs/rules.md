@@ -8,8 +8,10 @@ EnvGuard rules are grouped by practical configuration risk.
 | Weak secrets | `weak-jwt-secret`, `weak-session-secret`, `placeholder-secret`, `dummy-api-key`, `weak-password` |
 | Runtime | `debug-enabled`, `node-dev-production`, `flask-dev-env`, `django-debug`, `ssl-disabled`, `tls-disabled`, `debug-logging` |
 | CORS | `cors-wildcard`, `cors-credentials-wildcard`, `allowed-origins-wildcard` |
-| Docker and Compose | `docker-copy-dotenv`, `docker-copy-all`, `docker-latest-tag`, `docker-root-user`, `compose-privileged`, `compose-db-public-port`, `compose-inline-secret` |
+| Env hygiene and schema | `env-duplicate-key`, `env-empty-value`, `env-invalid-key`, `env-malformed-line`, `env-inconsistent-quotes`, `env-schema-missing-key`, `env-schema-extra-key`, `env-schema-unsafe-default` |
+| Docker and Compose | `docker-copy-dotenv`, `docker-copy-all`, `docker-latest-tag`, `docker-root-user`, `docker-missing-dockerignore`, `docker-add-remote-url`, `compose-privileged`, `compose-db-public-port`, `compose-inline-secret`, `compose-host-network`, `compose-unsafe-volume`, `compose-latest-tag` |
 | GitHub Actions | `actions-echo-secret`, `actions-pull-request-target`, `actions-unpinned`, `actions-hardcoded-token`, `actions-broad-permissions`, `actions-missing-permissions` |
+| GitLab CI and CircleCI | `gitlab-echo-secret`, `gitlab-unpinned-image`, `circleci-echo-secret`, `circleci-broad-context` |
 
 ## Severity
 
@@ -74,3 +76,20 @@ EnvGuard rules are grouped by practical configuration risk.
 | `actions-hardcoded-token` | High | Medium | Literal token in workflow. Use GitHub Secrets. |
 | `actions-broad-permissions` | High | High | `permissions: write-all`. Use least privilege. |
 | `actions-missing-permissions` | Low | Medium | Missing explicit permissions block. Add least-privilege permissions. |
+| `env-duplicate-key` | Low | High | Duplicate env key. Keep one source of truth. |
+| `env-empty-value` | Low | High | Empty env value. Set or document intentional empties. |
+| `env-invalid-key` | Low | High | Non-portable env key. Prefer uppercase keys with underscores. |
+| `env-malformed-line` | Low | Medium | Invalid dotenv assignment. Use `KEY=value`. |
+| `env-inconsistent-quotes` | Low | Medium | Mismatched quotes. Close quotes consistently. |
+| `env-schema-missing-key` | Low | Medium | Runtime key missing from example/schema. Document it safely. |
+| `env-schema-extra-key` | Info | Medium | Example/schema key not used by runtime env. Remove stale entries. |
+| `env-schema-unsafe-default` | Medium | Medium | Example/schema includes unsafe defaults. Use safe placeholders. |
+| `gitlab-echo-secret` | High | Medium | GitLab CI echoes a secret-like variable. Do not print secrets. |
+| `gitlab-unpinned-image` | Low | Medium | GitLab CI image floats. Pin image versions. |
+| `circleci-echo-secret` | High | Medium | CircleCI echoes a secret-like variable. Do not print secrets. |
+| `circleci-broad-context` | Medium | Medium | Broad CircleCI context. Use narrower contexts. |
+| `docker-missing-dockerignore` | Medium | High | Missing `.dockerignore`. Exclude secrets and build noise. |
+| `docker-add-remote-url` | Medium | High | Remote `ADD`. Download with pinned checksums. |
+| `compose-host-network` | High | High | Host networking. Use scoped Docker networks. |
+| `compose-unsafe-volume` | High | Medium | Sensitive host mount. Avoid Docker socket/root/SSH mounts. |
+| `compose-latest-tag` | Low | High | Mutable Compose image tag. Pin images. |

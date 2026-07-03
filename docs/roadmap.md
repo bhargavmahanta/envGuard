@@ -33,10 +33,18 @@
 - Baseline and inline suppression support
 - Public GitHub repository when ready for launch
 
+## v1.1.0
+
+- Config guardrail positioning and comparison docs
+- Staged and changed-file scanning
+- GitHub Actions annotation output
+- Doctor JSON output and baseline audit
+- Env hygiene, schema drift, GitLab CI, CircleCI, and expanded Docker/Compose checks
+- Config allowlists, custom declarative rules, scan limits, pre-commit hook, and Docker image recipe
+
 ## Later
 
 - VS Code extension
-- Docker image
 - Framework presets
 - Monorepo support
 - Optional secret validation disabled by default

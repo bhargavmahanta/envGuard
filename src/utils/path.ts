@@ -38,10 +38,20 @@ export function isDockerfilePath(filePath: string): boolean {
 
 export function isComposePath(filePath: string): boolean {
   const normalized = normalizePath(filePath).toLowerCase();
-  return normalized.endsWith('docker-compose.yml') || normalized.endsWith('docker-compose.yaml');
+  return /(^|\/)docker-compose[^/]*\.ya?ml$/.test(normalized);
 }
 
 export function isGithubWorkflowPath(filePath: string): boolean {
   const normalized = normalizePath(filePath).toLowerCase();
   return normalized.includes('.github/workflows/') && /\.(ya?ml)$/.test(normalized);
+}
+
+export function isGitlabCiPath(filePath: string): boolean {
+  const normalized = normalizePath(filePath).toLowerCase();
+  return normalized.endsWith('.gitlab-ci.yml') || normalized.endsWith('.gitlab-ci.yaml');
+}
+
+export function isCircleCiPath(filePath: string): boolean {
+  const normalized = normalizePath(filePath).toLowerCase();
+  return normalized.endsWith('.circleci/config.yml') || normalized.endsWith('.circleci/config.yaml');
 }

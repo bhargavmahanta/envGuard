@@ -31,3 +31,17 @@ Verify locally:
 ```bash
 npm pack --dry-run
 ```
+
+## Docker
+
+Build a local image:
+
+```bash
+docker build -t envguard .
+```
+
+Scan the current project:
+
+```bash
+docker run --rm -v "$PWD:/work" -w /work envguard scan . --ci --fail-on high
+```

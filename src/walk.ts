@@ -32,6 +32,20 @@ async function loadEnvGuardIgnore(root: string): Promise<string[]> {
   }
 }
 
+async function loadGitIgnore(root: string): Promise<string[]> {
+  try {
+    const raw = await fs.readFile(path.join(root, '.gitignore'), 'utf8');
+    return raw
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith('#') && !line.startsWith('!'))
+      .map(normalizeIgnorePattern)
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 export async function resolveScanRoot(targetPath: string, cwd: string): Promise<string> {
   const absoluteTarget = path.resolve(cwd, targetPath);
   const stat = await fs.stat(absoluteTarget);
@@ -55,10 +69,12 @@ export async function discoverFiles(
   }
 
   const envguardIgnore = await loadEnvGuardIgnore(root);
+  const gitIgnore = config.scan.include_gitignored ? [] : await loadGitIgnore(root);
   const ignore = [
     ...DEFAULT_EXCLUDE_PATTERNS,
     ...config.exclude.map(normalizeIgnorePattern),
-    ...envguardIgnore
+    ...envguardIgnore,
+    ...gitIgnore
   ].filter(Boolean);
 
   const files = await fg(config.include, {

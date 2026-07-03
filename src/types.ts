@@ -4,7 +4,7 @@ export type Severity = (typeof SEVERITIES)[number];
 export const CONFIDENCES = ['low', 'medium', 'high'] as const;
 export type Confidence = (typeof CONFIDENCES)[number];
 
-export type OutputFormat = 'terminal' | 'json' | 'markdown' | 'sarif';
+export type OutputFormat = 'terminal' | 'json' | 'markdown' | 'sarif' | 'github';
 
 export type DetectionCategory =
   | 'secret'
@@ -13,9 +13,33 @@ export type DetectionCategory =
   | 'cors'
   | 'docker'
   | 'github-actions'
+  | 'ci'
+  | 'env-hygiene'
+  | 'schema'
+  | 'custom'
   | 'entropy';
 
-export type FileKind = 'env' | 'yaml' | 'dockerfile' | 'github-actions' | 'text';
+export type FileKind = 'env' | 'yaml' | 'dockerfile' | 'github-actions' | 'gitlab-ci' | 'circleci' | 'text';
+
+export interface CustomRuleConfig {
+  id: string;
+  severity: Severity;
+  confidence: Confidence;
+  file_globs: string[];
+  pattern: string;
+  message: string;
+  fix: string;
+}
+
+export interface AllowConfig {
+  ruleId?: string;
+  path?: string;
+  key?: string;
+  fingerprint?: string;
+  reason: string;
+  owner: string;
+  expires?: string;
+}
 
 export interface EnvGuardConfig {
   severity: {
@@ -30,6 +54,14 @@ export interface EnvGuardConfig {
   };
   rules: {
     disabled: string[];
+    packs: string[];
+    custom: CustomRuleConfig[];
+  };
+  allow: AllowConfig[];
+  scan: {
+    max_file_mb: number;
+    timeout_seconds: number;
+    include_gitignored: boolean;
   };
   include: string[];
   exclude: string[];
@@ -64,6 +96,7 @@ export interface Finding {
   preview: string;
   message: string;
   fix: string;
+  key?: string;
 }
 
 export interface EnvEntry {
@@ -87,6 +120,7 @@ export interface ScanOptions {
   cwd?: string;
   baselinePath?: string;
   useBaseline?: boolean;
+  targetFiles?: string[];
 }
 
 export interface ScanSummary {
@@ -94,6 +128,7 @@ export interface ScanSummary {
   findings: number;
   bySeverity: Record<Severity, number>;
   highestSeverity?: Severity;
+  skippedFiles: number;
 }
 
 export interface ScanResult {
@@ -117,6 +152,9 @@ export interface BaselineFile {
     filePath: string;
     line: number;
     title: string;
+    reason?: string;
+    owner?: string;
+    expires?: string;
   }>;
 }
 

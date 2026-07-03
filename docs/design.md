@@ -36,6 +36,8 @@ Automation flags:
 | `--quiet` | Suppresses non-error output. |
 | `--verbose` | Prints additional diagnostics. |
 | `--no-color` | Disables colored terminal output. |
+| `--staged` | Scans staged git files only. |
+| `--changed [base-ref]` | Scans changed git files only. |
 
 ## Report Schema
 
@@ -78,7 +80,7 @@ JSON reports use schema version `1.0.0`:
 }
 ```
 
-SARIF reports use SARIF `2.1.0` and include masked previews in `properties.preview`.
+SARIF reports use SARIF `2.1.0` and include masked previews in `properties.preview`. GitHub annotation output is available with `--format github`.
 
 ## False-Positive Controls
 
@@ -100,6 +102,8 @@ JWT_SECRET=secret
 API_KEY=synthetic-value # envguard-disable-line generic-api-key
 ```
 
+Config-level allowlists can suppress known findings by `ruleId`, `path`, `key`, or `fingerprint`. Entries require `reason` and `owner`; expired entries do not suppress findings.
+
 ## Core Modules
 
 | Module | Purpose |
@@ -111,14 +115,13 @@ API_KEY=synthetic-value # envguard-disable-line generic-api-key
 | `masking.ts` | Secret preview masking |
 | `riskScore.ts` | Numeric risk score calculation |
 | `dedupe.ts` | Duplicate finding removal |
-| `reporter.ts` | Terminal, JSON, and Markdown output |
+| `reporter.ts` | Terminal, JSON, Markdown, SARIF, and GitHub annotation output |
 | `scanner.ts` | End-to-end scan orchestration |
 
 ## Non-Goals for v1
 
 - Git history scanning
 - Live credential validation
-- SARIF output
 - VS Code extension
 - Dashboard
 - Autofix

@@ -135,4 +135,116 @@ describe('scanner', () => {
     expect(sarif.runs[0].results.length).toBeGreaterThan(0);
     expect(serialized).not.toContain('supersecret');
   });
+
+  it('detects env hygiene and env example drift', async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'envguard-'));
+    await writeFixture(
+      '.env',
+      [
+        'APP_ENV=production',
+        'bad.key=value',
+        'EMPTY_VALUE=',
+        'DUPLICATE=value-a',
+        'DUPLICATE=value-b',
+        'BROKEN_QUOTE="value',
+        'NOT_IN_EXAMPLE=true',
+        'this is not valid env'
+      ].join('\n')
+    );
+    await writeFixture(
+      '.env.example',
+      [
+        'APP_ENV=development',
+        'EMPTY_VALUE=',
+        'DUPLICATE=',
+        'STALE_ONLY='
+      ].join('\n')
+    );
+
+    const result = await scan('.', { cwd: tmpDir, useBaseline: false });
+    const ruleIds = new Set(result.findings.map((finding) => finding.ruleId));
+
+    expect(ruleIds).toContain('env-invalid-key');
+    expect(ruleIds).toContain('env-empty-value');
+    expect(ruleIds).toContain('env-duplicate-key');
+    expect(ruleIds).toContain('env-inconsistent-quotes');
+    expect(ruleIds).toContain('env-malformed-line');
+    expect(ruleIds).toContain('env-schema-missing-key');
+    expect(ruleIds).toContain('env-schema-extra-key');
+    expect(ruleIds).toContain('env-schema-unsafe-default');
+  });
+
+  it('detects GitLab, CircleCI, and expanded Docker/Compose risks', async () => {
+    await writeFixture(
+      '.gitlab-ci.yml',
+      ['image: node', 'deploy:', '  script:', '    - echo $DEPLOY_TOKEN'].join('\n')
+    );
+    await writeFixture(
+      '.circleci/config.yml',
+      ['version: 2.1', 'jobs:', '  deploy:', '    context: org-global', '    steps:', '      - run: echo $API_KEY'].join('\n')
+    );
+    await writeFixture(
+      'Dockerfile.remote',
+      ['FROM node:20', 'ADD https://example.com/tool /usr/local/bin/tool', 'USER node'].join('\n')
+    );
+    await writeFixture(
+      'docker-compose.extra.yml',
+      ['services:', '  web:', '    image: redis:latest', '    network_mode: host', '    volumes:', '      - /var/run/docker.sock:/var/run/docker.sock'].join('\n')
+    );
+
+    const result = await scan('.', { cwd: tmpDir, useBaseline: false });
+    const ruleIds = new Set(result.findings.map((finding) => finding.ruleId));
+
+    expect(ruleIds).toContain('gitlab-echo-secret');
+    expect(ruleIds).toContain('gitlab-unpinned-image');
+    expect(ruleIds).toContain('circleci-echo-secret');
+    expect(ruleIds).toContain('circleci-broad-context');
+    expect(ruleIds).toContain('docker-add-remote-url');
+    expect(ruleIds).toContain('docker-missing-dockerignore');
+    expect(ruleIds).toContain('compose-host-network');
+    expect(ruleIds).toContain('compose-unsafe-volume');
+    expect(ruleIds).toContain('compose-latest-tag');
+  });
+
+  it('supports custom rules and config allowlists', async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'envguard-'));
+    await writeFixture(
+      'envguard.config.yml',
+      [
+        'rules:',
+        '  custom:',
+        '    - id: no-localhost-callback',
+        '      severity: medium',
+        '      confidence: high',
+        '      file_globs:',
+        '        - ".env"',
+        '      pattern: "CALLBACK_URL=http://localhost"',
+        '      message: "Localhost callback URL is unsafe in shared config."',
+        '      fix: "Use an environment-specific callback URL."',
+        'allow:',
+        '  - ruleId: weak-jwt-secret',
+        '    path: ".env"',
+        '    key: JWT_SECRET',
+        '    reason: "Fixture intentionally covers weak values."',
+        '    owner: "security"'
+      ].join('\n')
+    );
+    await writeFixture('.env', ['JWT_SECRET=secret', 'CALLBACK_URL=http://localhost:3000/callback'].join('\n'));
+
+    const result = await scan('.', { cwd: tmpDir, useBaseline: false });
+    const ruleIds = new Set(result.findings.map((finding) => finding.ruleId));
+
+    expect(ruleIds).toContain('no-localhost-callback');
+    expect(ruleIds).not.toContain('weak-jwt-secret');
+  });
+
+  it('renders GitHub Actions annotations', async () => {
+    const result = await scan('.', { cwd: tmpDir, useBaseline: false });
+    const github = renderReport(result, 'github');
+
+    expect(github).toContain('::error file=');
+    expect(github).toContain('title=');
+  });
 });

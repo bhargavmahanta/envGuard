@@ -1,21 +1,24 @@
 # EnvGuard
 
-> Developer-first CLI scanner for unsafe `.env`, Docker, config, and CI/CD settings.
+> Security linting for env, Docker, CI, and runtime configuration.
 
 [![npm](https://img.shields.io/npm/v/@bhargavmahanta/envguard)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
 [![CI](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml/badge.svg)](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-EnvGuard helps developers catch leaked secrets, weak environment values, unsafe Docker defaults, and risky GitHub Actions patterns before they reach production.
+EnvGuard helps developers catch unsafe environment values, risky runtime defaults, Docker/Compose hazards, and CI/CD configuration issues before they reach production. It complements deep secret-history scanners like Gitleaks and TruffleHog rather than replacing them.
 
 ## Features
 
 - Scan `.env`, config, Docker, Compose, and GitHub Actions files
+- Scan GitLab CI and CircleCI configuration
+- Check `.env` hygiene and `.env.example` / `.env.schema` drift
 - Detect real-looking secrets, weak secrets, unsafe runtime settings, and wildcard CORS
 - Detect Docker and CI/CD security issues
-- Mask secrets by default in terminal, JSON, Markdown, and SARIF reports
+- Mask secrets by default in terminal, JSON, Markdown, SARIF, and GitHub annotation reports
 - Support local CLI usage, pre-commit hooks, and GitHub Actions
+- Scan only staged or changed files for fast developer workflows
 - Use the included reusable GitHub Action wrapper
 - Configure behavior with `envguard.config.yml` and `.envguardignore`
 
@@ -38,9 +41,13 @@ envguard scan .
 envguard scan . --ci --fail-on high
 envguard scan . --format json --output report.json
 envguard scan . --format markdown --output report.md
+envguard scan --staged
+envguard scan --changed origin/main
+envguard scan . --format github
+envguard baseline audit
 envguard init
 envguard rules
-envguard doctor
+envguard doctor --json
 ```
 
 On Windows PowerShell, if script execution blocks the generated `envguard.ps1` shim, use the `.cmd` shim:
@@ -67,9 +74,11 @@ npx --package @bhargavmahanta/envguard envguard.cmd scan .
 - Weak JWT/session/API secrets and placeholder values
 - `DEBUG=true`, development runtimes, disabled SSL/TLS verification
 - Wildcard CORS and wildcard CORS with credentials
-- Dockerfiles that copy `.env`, use `latest`, or run as root
-- Compose privileged containers, public database ports, and inline secrets
+- `.env` duplicate keys, empty values, malformed lines, invalid keys, and schema drift
+- Dockerfiles that copy `.env`, use `latest`, run as root, miss `.dockerignore`, or use remote `ADD`
+- Compose privileged containers, public database ports, host networking, unsafe volumes, inline secrets, and `latest` tags
 - GitHub Actions secret printing, `pull_request_target`, floating actions, broad permissions
+- GitLab CI and CircleCI secret-printing and risky defaults
 
 ## Configuration
 
@@ -94,6 +103,20 @@ output:
 
 rules:
   disabled: []
+  packs:
+    - node
+    - python
+    - docker
+    - github-actions
+    - ci
+  custom: []
+
+allow: []
+
+scan:
+  max_file_mb: 2
+  timeout_seconds: 0
+  include_gitignored: false
 ```
 
 Example `.envguardignore`:
@@ -113,6 +136,7 @@ terminal
 json
 markdown
 sarif
+github
 ```
 
 ## Sample Vulnerable Project
@@ -132,6 +156,7 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 ## Documentation
 
 - [Rule catalog](https://github.com/bhargavmahanta/envGuard/blob/main/docs/rules.md)
+- [How EnvGuard compares](https://github.com/bhargavmahanta/envGuard/blob/main/docs/comparison.md)
 - [Remediation guide](https://github.com/bhargavmahanta/envGuard/blob/main/docs/remediation.md)
 - [GitHub Actions setup](https://github.com/bhargavmahanta/envGuard/blob/main/docs/ci.md)
 - [Pre-commit setup](https://github.com/bhargavmahanta/envGuard/blob/main/docs/pre-commit.md)

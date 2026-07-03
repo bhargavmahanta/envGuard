@@ -1,0 +1,4 @@
+image: node
+deploy:
+  script:
+    - echo $DEPLOY_TOKEN

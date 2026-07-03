@@ -65,6 +65,46 @@ Generate a Markdown report:
 npx @bhargavmahanta/envguard scan . --format markdown --output envguard-report.md
 ```
 
+Generate GitHub Actions annotations:
+
+```bash
+npx @bhargavmahanta/envguard scan . --format github
+```
+
+## Pair With Gitleaks
+
+Use Gitleaks for deep secret and git-history scanning, then EnvGuard for environment, Docker, and CI configuration risks:
+
+```yaml
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
+```
+
 On Windows PowerShell, use the `.cmd` shim if script execution blocks `envguard.ps1`:
 
 ```powershell

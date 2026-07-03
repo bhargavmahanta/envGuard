@@ -26,6 +26,18 @@ jobs:
       - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
+## Pull Request Changed Files
+
+```yaml
+- run: npx @bhargavmahanta/envguard scan --changed origin/main --ci --fail-on high
+```
+
+## GitHub Annotations
+
+```yaml
+- run: npx @bhargavmahanta/envguard scan . --format github
+```
+
 ## SARIF for GitHub Code Scanning
 
 ```yaml
@@ -43,7 +55,23 @@ npx husky init
 ```
 
 ```bash
-npx @bhargavmahanta/envguard scan . --ci --fail-on high
+npx @bhargavmahanta/envguard scan --staged --ci --fail-on high
+```
+
+## Custom Rule
+
+```yaml
+rules:
+  custom:
+    - id: no-localhost-callback
+      severity: medium
+      confidence: high
+      file_globs:
+        - ".env"
+        - ".env.*"
+      pattern: "CALLBACK_URL=http://localhost"
+      message: "Localhost callback URL is unsafe in shared config."
+      fix: "Use an environment-specific callback URL."
 ```
 
 ## Docker Projects
@@ -62,7 +90,7 @@ dist
 Then run:
 
 ```bash
-npx @bhargavmahanta/envguard scan Dockerfile docker-compose.yml
+npx @bhargavmahanta/envguard scan .
 ```
 
 ## Node and Next.js Projects

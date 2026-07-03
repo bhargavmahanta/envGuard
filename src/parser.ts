@@ -1,7 +1,14 @@
 import path from 'node:path';
 import yaml from 'js-yaml';
 import type { EnvEntry, FileKind, ScannedFile } from './types.js';
-import { isDockerfilePath, isGithubWorkflowPath, normalizePath, relativeNormalized } from './utils/path.js';
+import {
+  isCircleCiPath,
+  isDockerfilePath,
+  isGithubWorkflowPath,
+  isGitlabCiPath,
+  normalizePath,
+  relativeNormalized
+} from './utils/path.js';
 
 export function parseEnvContent(content: string): EnvEntry[] {
   const lines = content.split(/\r?\n/);
@@ -46,6 +53,14 @@ export function detectFileKind(relativePath: string): FileKind {
     return 'github-actions';
   }
 
+  if (isGitlabCiPath(normalized)) {
+    return 'gitlab-ci';
+  }
+
+  if (isCircleCiPath(normalized)) {
+    return 'circleci';
+  }
+
   if (isDockerfilePath(normalized)) {
     return 'dockerfile';
   }
@@ -66,7 +81,7 @@ export function parseScannedFile(root: string, absolutePath: string, content: st
   const kind = detectFileKind(relativePath);
   let parsedYaml: unknown;
 
-  if (kind === 'yaml' || kind === 'github-actions') {
+  if (kind === 'yaml' || kind === 'github-actions' || kind === 'gitlab-ci' || kind === 'circleci') {
     try {
       parsedYaml = yaml.load(content);
     } catch {

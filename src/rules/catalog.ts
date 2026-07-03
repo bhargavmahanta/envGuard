@@ -369,6 +369,159 @@ export const RULES: RuleMeta[] = [
     confidence: 'medium',
     description: 'No explicit permissions block was found.',
     fix: 'Add a permissions block with the minimum scopes required.'
+  },
+  {
+    id: 'env-duplicate-key',
+    title: 'Duplicate env key',
+    category: 'env-hygiene',
+    severity: 'low',
+    confidence: 'high',
+    description: 'The same environment key appears more than once.',
+    fix: 'Keep a single value for each environment key.'
+  },
+  {
+    id: 'env-empty-value',
+    title: 'Empty env value',
+    category: 'env-hygiene',
+    severity: 'low',
+    confidence: 'high',
+    description: 'An environment key has an empty value.',
+    fix: 'Set an intentional value or document why the value must stay empty.'
+  },
+  {
+    id: 'env-invalid-key',
+    title: 'Invalid env key name',
+    category: 'env-hygiene',
+    severity: 'low',
+    confidence: 'high',
+    description: 'An environment key uses characters that many dotenv parsers reject.',
+    fix: 'Use uppercase letters, numbers, and underscores for portable env keys.'
+  },
+  {
+    id: 'env-malformed-line',
+    title: 'Malformed env line',
+    category: 'env-hygiene',
+    severity: 'low',
+    confidence: 'medium',
+    description: 'A non-comment line in an env file is not a valid key-value assignment.',
+    fix: 'Use KEY=value syntax or comment out explanatory text.'
+  },
+  {
+    id: 'env-inconsistent-quotes',
+    title: 'Inconsistent env quotes',
+    category: 'env-hygiene',
+    severity: 'low',
+    confidence: 'medium',
+    description: 'An env value starts with a quote but does not close with the same quote.',
+    fix: 'Use matching single or double quotes around the whole value.'
+  },
+  {
+    id: 'env-schema-missing-key',
+    title: 'Env key missing from example or schema',
+    category: 'schema',
+    severity: 'low',
+    confidence: 'medium',
+    description: 'A runtime env key is absent from the example or schema file.',
+    fix: 'Add the key to the example/schema file with a safe placeholder.'
+  },
+  {
+    id: 'env-schema-extra-key',
+    title: 'Example or schema env key is unused',
+    category: 'schema',
+    severity: 'info',
+    confidence: 'medium',
+    description: 'An example/schema key does not appear in the runtime env file.',
+    fix: 'Remove stale keys or add the missing runtime configuration.'
+  },
+  {
+    id: 'env-schema-unsafe-default',
+    title: 'Unsafe default in env example or schema',
+    category: 'schema',
+    severity: 'medium',
+    confidence: 'medium',
+    description: 'An example/schema file contains a risky default value.',
+    fix: 'Use an empty value, local-only placeholder, or documented setup instruction.'
+  },
+  {
+    id: 'gitlab-echo-secret',
+    title: 'GitLab CI prints a secret',
+    category: 'ci',
+    severity: 'high',
+    confidence: 'medium',
+    description: 'A GitLab CI command appears to echo a secret variable.',
+    fix: 'Avoid printing secrets and pass them directly to tools that need them.'
+  },
+  {
+    id: 'gitlab-unpinned-image',
+    title: 'GitLab CI image uses a floating tag',
+    category: 'ci',
+    severity: 'low',
+    confidence: 'medium',
+    description: 'A GitLab CI image uses latest or no explicit version.',
+    fix: 'Pin CI images to an explicit version or digest.'
+  },
+  {
+    id: 'circleci-echo-secret',
+    title: 'CircleCI prints a secret',
+    category: 'ci',
+    severity: 'high',
+    confidence: 'medium',
+    description: 'A CircleCI command appears to echo a secret variable.',
+    fix: 'Avoid printing secrets and pass them directly to tools that need them.'
+  },
+  {
+    id: 'circleci-broad-context',
+    title: 'CircleCI uses broad organization context',
+    category: 'ci',
+    severity: 'medium',
+    confidence: 'medium',
+    description: 'A workflow references a broad organization context that may expose many secrets.',
+    fix: 'Use the narrowest possible CircleCI context for each job.'
+  },
+  {
+    id: 'docker-missing-dockerignore',
+    title: 'Docker build context has no dockerignore',
+    category: 'docker',
+    severity: 'medium',
+    confidence: 'high',
+    description: 'No .dockerignore file was found for a Docker build context.',
+    fix: 'Add a .dockerignore that excludes env files, build output, dependencies, and VCS data.'
+  },
+  {
+    id: 'docker-add-remote-url',
+    title: 'Dockerfile adds a remote URL',
+    category: 'docker',
+    severity: 'medium',
+    confidence: 'high',
+    description: 'ADD downloads remote content during image build.',
+    fix: 'Download remote artifacts with pinned checksums in a controlled build step.'
+  },
+  {
+    id: 'compose-host-network',
+    title: 'Compose service uses host networking',
+    category: 'docker',
+    severity: 'high',
+    confidence: 'high',
+    description: 'Host networking removes important container network isolation.',
+    fix: 'Use a scoped Docker network and expose only required ports.'
+  },
+  {
+    id: 'compose-unsafe-volume',
+    title: 'Compose mounts a sensitive host path',
+    category: 'docker',
+    severity: 'high',
+    confidence: 'medium',
+    description: 'A Compose volume mounts a sensitive host path or Docker socket.',
+    fix: 'Avoid mounting host secrets, root paths, or the Docker socket into containers.'
+  },
+  {
+    id: 'compose-latest-tag',
+    title: 'Compose image uses latest tag',
+    category: 'docker',
+    severity: 'low',
+    confidence: 'high',
+    description: 'A Compose service image uses the mutable latest tag.',
+    fix: 'Pin Compose images to explicit versions or digests.'
   }
 ];
 

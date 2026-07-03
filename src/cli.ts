@@ -4,20 +4,21 @@ import path from 'node:path';
 import chalk from 'chalk';
 import { Command, InvalidArgumentError } from 'commander';
 import ora from 'ora';
-import { defaultBaselinePath, writeBaseline } from './baseline.js';
+import { defaultBaselinePath, loadBaselineFile, writeBaseline } from './baseline.js';
 import { VERSION } from './defaults.js';
 import { loadConfig } from './config.js';
+import { getChangedFiles, getStagedFiles } from './git.js';
 import { RULES } from './rules/catalog.js';
 import { renderReport } from './reporter.js';
 import { scan, shouldFail } from './scanner.js';
 import { SEVERITIES, type OutputFormat, type Severity } from './types.js';
 
 function parseFormat(value: string): OutputFormat {
-  if (value === 'terminal' || value === 'json' || value === 'markdown' || value === 'sarif') {
+  if (value === 'terminal' || value === 'json' || value === 'markdown' || value === 'sarif' || value === 'github') {
     return value;
   }
 
-  throw new InvalidArgumentError('format must be one of terminal, json, markdown, sarif');
+  throw new InvalidArgumentError('format must be one of terminal, json, markdown, sarif, github');
 }
 
 function parseSeverity(value: string): Severity {
@@ -56,6 +57,20 @@ output:
 
 rules:
   disabled: []
+  packs:
+    - node
+    - python
+    - docker
+    - github-actions
+    - ci
+  custom: []
+
+allow: []
+
+scan:
+  max_file_mb: 2
+  timeout_seconds: 0
+  include_gitignored: false
 
 exclude:
   - docs/fixtures/
@@ -79,12 +94,14 @@ program
   .command('scan')
   .description('Scan a project for unsafe environment and configuration issues.')
   .argument('[target]', 'file or directory to scan', '.')
-  .option('-f, --format <format>', 'report format: terminal, json, markdown', parseFormat, 'terminal')
+  .option('-f, --format <format>', 'report format: terminal, json, markdown, sarif, github', parseFormat, 'terminal')
   .option('-o, --output <path>', 'write the report to a file')
   .option('--ci', 'enable CI mode with non-zero exit on configured severity')
   .option('--fail-on <severity>', 'CI failure threshold', parseSeverity)
   .option('--baseline <path>', 'path to baseline file', '.envguard-baseline.json')
   .option('--update-baseline', 'write the current findings to the baseline file')
+  .option('--staged', 'scan only staged git files')
+  .option('--changed [base-ref]', 'scan changed git files, optionally against a base ref')
   .option('--no-color', 'disable colored terminal output')
   .option('--quiet', 'suppress non-error output')
   .option('--verbose', 'print extra diagnostic details')
@@ -98,6 +115,8 @@ program
         failOn?: Severity;
         updateBaseline?: boolean;
         baseline?: string;
+        staged?: boolean;
+        changed?: boolean | string;
         color?: boolean;
         quiet?: boolean;
         verbose?: boolean;
@@ -117,9 +136,22 @@ program
       try {
         const loaded = await loadConfig(process.cwd());
         const baselinePath = path.resolve(options.baseline ?? defaultBaselinePath(process.cwd()));
+        if (options.staged && options.changed) {
+          throw new InvalidArgumentError('Use either --staged or --changed, not both');
+        }
+
+        const targetFiles = options.staged
+          ? await getStagedFiles(process.cwd())
+          : options.changed
+            ? await getChangedFiles(
+                process.cwd(),
+                typeof options.changed === 'string' ? options.changed : undefined
+              )
+            : undefined;
         const result = await scan(target, {
           baselinePath,
-          useBaseline: !options.updateBaseline
+          useBaseline: !options.updateBaseline,
+          targetFiles
         });
         const output = renderReport(result, options.format);
 
@@ -142,6 +174,10 @@ program
         if (options.verbose && !options.quiet) {
           console.error(chalk.gray(`Baseline: ${baselinePath}`));
           console.error(chalk.gray(`Findings after baseline: ${result.summary.findings}`));
+          console.error(chalk.gray(`Skipped files: ${result.summary.skippedFiles}`));
+          if (targetFiles) {
+            console.error(chalk.gray(`Git-selected files: ${targetFiles.length}`));
+          }
         }
 
         const failOn = options.failOn ?? loaded.config.severity.fail_on;
@@ -170,6 +206,53 @@ program
     console.log(`.envguardignore: ${ignoreStatus}`);
   });
 
+const baseline = program.command('baseline').description('Manage EnvGuard baseline files.');
+
+baseline
+  .command('audit')
+  .description('Show suppressed and stale entries in an EnvGuard baseline.')
+  .argument('[target]', 'file or directory to scan', '.')
+  .option('--baseline <path>', 'path to baseline file', '.envguard-baseline.json')
+  .option('--json', 'print audit as JSON')
+  .action(async (target: string, options: { baseline?: string; json?: boolean }) => {
+    try {
+      const baselinePath = path.resolve(options.baseline ?? defaultBaselinePath(process.cwd()));
+      const baselineFile = await loadBaselineFile(baselinePath);
+      const result = await scan(target, {
+        baselinePath,
+        useBaseline: false
+      });
+      const currentFingerprints = new Set(result.findings.map((finding) => finding.fingerprint));
+      const entries = baselineFile?.findings ?? [];
+      const suppressed = entries.filter((entry) => currentFingerprints.has(entry.fingerprint));
+      const stale = entries.filter((entry) => !currentFingerprints.has(entry.fingerprint));
+      const audit = {
+        baselinePath,
+        generatedAt: new Date().toISOString(),
+        entries: entries.length,
+        suppressed: suppressed.length,
+        stale: stale.length,
+        suppressedFindings: suppressed,
+        staleFindings: stale
+      };
+
+      if (options.json) {
+        console.log(JSON.stringify(audit, null, 2));
+        return;
+      }
+
+      console.log(chalk.bold('EnvGuard baseline audit'));
+      console.log(`Baseline: ${baselinePath}`);
+      console.log(`Entries: ${audit.entries}`);
+      console.log(`Suppressed current findings: ${audit.suppressed}`);
+      console.log(`Stale entries: ${audit.stale}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(chalk.red(message));
+      process.exitCode = 1;
+    }
+  });
+
 program
   .command('rules')
   .description('List built-in EnvGuard rules.')
@@ -188,18 +271,42 @@ program
 program
   .command('doctor')
   .description('Check local EnvGuard setup.')
-  .action(async () => {
+  .option('--json', 'print doctor output as JSON')
+  .action(async (options: { json?: boolean }) => {
     const major = Number(process.versions.node.split('.')[0]);
     const nodeOk = major >= 20;
-    console.log(`Node.js: ${process.version} ${nodeOk ? chalk.green('ok') : chalk.red('requires >=20')}`);
+    const checks: Array<{ name: string; ok: boolean; message: string }> = [
+      {
+        name: 'node',
+        ok: nodeOk,
+        message: `${process.version}${nodeOk ? '' : ' requires >=20'}`
+      }
+    ];
 
     try {
       const loaded = await loadConfig(process.cwd());
-      console.log(`Config: ${loaded.configPath ?? 'default config'} ${chalk.green('ok')}`);
+      checks.push({
+        name: 'config',
+        ok: true,
+        message: loaded.configPath ?? 'default config'
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.log(`Config: ${chalk.red(message)}`);
+      checks.push({
+        name: 'config',
+        ok: false,
+        message
+      });
       process.exitCode = 1;
+    }
+
+    if (options.json) {
+      console.log(JSON.stringify({ tool: 'envguard', version: VERSION, ok: checks.every((check) => check.ok), checks }, null, 2));
+      return;
+    }
+
+    for (const check of checks) {
+      console.log(`${check.name}: ${check.message} ${check.ok ? chalk.green('ok') : chalk.red('failed')}`);
     }
   });
 

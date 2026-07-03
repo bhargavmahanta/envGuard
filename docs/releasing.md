@@ -30,7 +30,15 @@ npm version prerelease --preid rc
 
 ## Publishing
 
-The GitHub release workflow publishes to npm when a GitHub release is published. Configure `NPM_TOKEN` as a repository secret.
+The GitHub release workflow publishes to npm when a GitHub release is published. Prefer npm trusted publishing with:
+
+- package: `@bhargavmahanta/envguard`
+- owner: `bhargavmahanta`
+- repository: `envGuard`
+- workflow: `release.yml`
+- permission: allow npm publish
+
+If trusted publishing is not available, configure `NPM_TOKEN` as a repository secret.
 
 Manual fallback:
 

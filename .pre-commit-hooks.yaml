@@ -1,0 +1,7 @@
+- id: envguard
+  name: EnvGuard
+  description: Scan staged env, Docker, and CI configuration for security risks.
+  entry: envguard scan --staged
+  language: node
+  pass_filenames: false
+  always_run: true

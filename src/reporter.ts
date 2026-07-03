@@ -20,6 +20,15 @@ function escapeMarkdown(value: string): string {
   return value.replace(/\|/g, '\\|').replace(/\n/g, ' ');
 }
 
+function escapeAnnotation(value: string): string {
+  return value
+    .replace(/%/g, '%25')
+    .replace(/\r/g, '%0D')
+    .replace(/\n/g, '%0A')
+    .replace(/:/g, '%3A')
+    .replace(/,/g, '%2C');
+}
+
 function renderFindingTerminal(finding: Finding): string {
   const label = severityColor(finding.severity)(`[${finding.severity.toUpperCase()}]`);
   return [
@@ -185,6 +194,21 @@ export function renderMarkdownReport(result: ScanResult): string {
   return lines.join('\n');
 }
 
+export function renderGithubReport(result: ScanResult): string {
+  if (result.findings.length === 0) {
+    return 'EnvGuard: no findings detected.\n';
+  }
+
+  return `${result.findings
+    .map((finding) => {
+      const command = finding.severity === 'critical' || finding.severity === 'high' ? 'error' : 'warning';
+      const title = `${finding.title} (${finding.ruleId})`;
+      const message = `${finding.message} Fix: ${finding.fix}`;
+      return `::${command} file=${escapeAnnotation(finding.filePath)},line=${finding.line},title=${escapeAnnotation(title)}::${escapeAnnotation(message)}`;
+    })
+    .join('\n')}\n`;
+}
+
 export function renderReport(result: ScanResult, format: OutputFormat): string {
   if (format === 'json') {
     return renderJsonReport(result);
@@ -196,6 +220,10 @@ export function renderReport(result: ScanResult, format: OutputFormat): string {
 
   if (format === 'sarif') {
     return renderSarifReport(result);
+  }
+
+  if (format === 'github') {
+    return renderGithubReport(result);
   }
 
   return renderTerminalReport(result);

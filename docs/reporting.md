@@ -1,6 +1,6 @@
 # Reporting
 
-EnvGuard supports four report formats:
+EnvGuard supports five report formats:
 
 | Format | Use case |
 | --- | --- |
@@ -8,6 +8,7 @@ EnvGuard supports four report formats:
 | `json` | Automation and custom dashboards. |
 | `markdown` | Saved reports in pull requests or artifacts. |
 | `sarif` | GitHub code scanning and SARIF-compatible tools. |
+| `github` | GitHub Actions workflow annotations. |
 
 ## JSON
 
@@ -36,6 +37,12 @@ Upload to GitHub code scanning:
 - uses: github/codeql-action/upload-sarif@v3
   with:
     sarif_file: envguard.sarif
+```
+
+## GitHub Annotations
+
+```bash
+npx @bhargavmahanta/envguard scan . --format github
 ```
 
 All report formats mask sensitive values by default.

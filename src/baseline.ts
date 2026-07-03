@@ -17,14 +17,24 @@ export function defaultBaselinePath(cwd: string): string {
 }
 
 export async function loadBaseline(filePath: string): Promise<Set<string>> {
+  const parsed = await loadBaselineFile(filePath);
+  return new Set((parsed?.findings ?? []).map((finding) => finding.fingerprint).filter(Boolean));
+}
+
+export async function loadBaselineFile(filePath: string): Promise<BaselineFile | undefined> {
   try {
     const raw = await fs.readFile(filePath, 'utf8');
     const parsed = JSON.parse(raw) as Partial<BaselineFile>;
-    return new Set((parsed.findings ?? []).map((finding) => finding.fingerprint).filter(Boolean));
+    return {
+      tool: 'envguard',
+      schemaVersion: REPORT_SCHEMA_VERSION,
+      generatedAt: parsed.generatedAt ?? new Date(0).toISOString(),
+      findings: parsed.findings ?? []
+    };
   } catch (error) {
     const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
     if (code === 'ENOENT') {
-      return new Set();
+      return undefined;
     }
 
     throw new Error(`Failed to read baseline file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);

@@ -4,6 +4,20 @@ All notable changes to EnvGuard are documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style sections and uses semantic versioning.
 
+## 1.1.0
+
+### Added
+
+- Added `scan --staged`, `scan --changed`, `--format github`, `doctor --json`, and `baseline audit`.
+- Added `.env` hygiene, `.env.example` / `.env.schema` drift checks, GitLab CI, CircleCI, and expanded Docker/Compose rules.
+- Added config allowlists, declarative custom rules, rule packs, and scan limits.
+- Added first-party pre-commit metadata, Docker image recipe, and comparison docs.
+
+### Changed
+
+- Repositioned EnvGuard as security linting for env, Docker, CI, and runtime configuration.
+- Documented pairing EnvGuard with Gitleaks for deep secret/history scanning.
+
 ## 1.0.0
 
 ### Added

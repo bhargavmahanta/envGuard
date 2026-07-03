@@ -10,7 +10,22 @@ output:
 
 rules:
   disabled: []
+  packs:
+    - node
+    - python
+    - docker
+    - github-actions
+    - ci
+  custom: []
+
+allow: []
+
+scan:
+  max_file_mb: 2
+  timeout_seconds: 0
+  include_gitignored: false
 
 exclude:
   - examples/vulnerable-project/
+  - benchmarks/fixtures/
   - docs/fixtures/

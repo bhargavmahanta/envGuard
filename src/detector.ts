@@ -1,13 +1,23 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import picomatch from 'picomatch';
 import { isHighEntropy } from './entropy.js';
 import { maskSensitivePreview } from './masking.js';
 import { calculateRiskScore } from './riskScore.js';
 import { getRule } from './rules/catalog.js';
-import { SEVERITY_RANK, type EnvEntry, type Finding, type ScannedFile, type Severity } from './types.js';
 import {
+  SEVERITY_RANK,
+  type CustomRuleConfig,
+  type EnvEntry,
+  type Finding,
+  type ScannedFile,
+  type Severity
+} from './types.js';
+import {
+  isCircleCiPath,
   isComposePath,
   isExampleTemplatePath,
+  isGitlabCiPath,
   isGithubWorkflowPath,
   isProductionPath,
   lineNumberForIndex,
@@ -20,9 +30,10 @@ export interface DetectionContext {
   entropyThreshold: number;
   maskOutput: boolean;
   disabledRules: Set<string>;
+  customRules: CustomRuleConfig[];
 }
 
-type FindingOverride = Partial<Pick<Finding, 'severity' | 'confidence' | 'message' | 'fix'>>;
+type FindingOverride = Partial<Pick<Finding, 'severity' | 'confidence' | 'message' | 'fix' | 'key'>>;
 
 const WEAK_VALUES = new Set([
   'secret',
@@ -40,8 +51,7 @@ const WEAK_VALUES = new Set([
   'your_secret_here',
   'your-secret-here',
   'your_api_key',
-  'your-api-key',
-  '<generate-a-strong-random-secret>'
+  'your-api-key'
 ]);
 
 const PLACEHOLDER_VALUES = new Set([
@@ -133,6 +143,20 @@ function valueLooksFake(value: string): boolean {
   );
 }
 
+function isEnvExampleOrSchemaPath(filePath: string): boolean {
+  const base = path.posix.basename(normalizePath(filePath)).toLowerCase();
+  return (
+    base.endsWith('.env.example') ||
+    base.endsWith('.env.sample') ||
+    base.endsWith('.env.template') ||
+    base.endsWith('.env.schema') ||
+    base === '.env.example' ||
+    base === '.env.sample' ||
+    base === '.env.template' ||
+    base === '.env.schema'
+  );
+}
+
 function matchesSpecificSecret(value: string): boolean {
   return SPECIFIC_SECRET_REGEXES.some((regex) => regex.test(value));
 }
@@ -197,7 +221,42 @@ function makeFinding(
     line,
     preview: safePreview,
     message: override.message ?? rule.description,
-    fix: override.fix ?? rule.fix
+    fix: override.fix ?? rule.fix,
+    key: override.key
+  };
+}
+
+function makeCustomFinding(
+  file: ScannedFile,
+  context: DetectionContext,
+  rule: CustomRuleConfig,
+  line: number,
+  preview: string
+): Finding | undefined {
+  if (context.disabledRules.has(rule.id) || isInlineSuppressed(file, line, rule.id)) {
+    return undefined;
+  }
+
+  const safePreview = context.maskOutput ? maskSensitivePreview(preview.trim()) : preview.trim();
+  return {
+    id: '',
+    fingerprint: '',
+    ruleId: rule.id,
+    title: rule.id,
+    category: 'custom',
+    severity: rule.severity,
+    confidence: rule.confidence,
+    riskScore: calculateRiskScore({
+      severity: rule.severity,
+      confidence: rule.confidence,
+      filePath: file.relativePath,
+      ruleId: rule.id
+    }),
+    filePath: file.relativePath,
+    line,
+    preview: safePreview,
+    message: rule.message,
+    fix: rule.fix
   };
 }
 
@@ -261,7 +320,7 @@ function detectSpecificSecrets(file: ScannedFile, context: DetectionContext, fin
 
     pushFinding(
       findings,
-      makeFinding(file, context, 'aws-secret-key', entry.line, entry.raw, entry.value)
+      makeFinding(file, context, 'aws-secret-key', entry.line, entry.raw, entry.value, { key: entry.key })
     );
   }
 }
@@ -275,7 +334,7 @@ function detectGenericSecrets(file: ScannedFile, context: DetectionContext, find
     if (entry.value.length >= 20 || isHighEntropy(entry.value, context.entropyThreshold)) {
       pushFinding(
         findings,
-        makeFinding(file, context, 'generic-api-key', entry.line, entry.raw, entry.value)
+        makeFinding(file, context, 'generic-api-key', entry.line, entry.raw, entry.value, { key: entry.key })
       );
     }
   }
@@ -304,7 +363,7 @@ function detectWeakSecrets(file: ScannedFile, context: DetectionContext, finding
     if (key.includes('JWT_SECRET') && WEAK_VALUES.has(value)) {
       pushFinding(
         findings,
-        makeFinding(file, context, 'weak-jwt-secret', entry.line, entry.raw, entry.value)
+        makeFinding(file, context, 'weak-jwt-secret', entry.line, entry.raw, entry.value, { key: entry.key })
       );
       continue;
     }
@@ -312,7 +371,7 @@ function detectWeakSecrets(file: ScannedFile, context: DetectionContext, finding
     if (key.includes('SESSION_SECRET') && WEAK_VALUES.has(value)) {
       pushFinding(
         findings,
-        makeFinding(file, context, 'weak-session-secret', entry.line, entry.raw, entry.value)
+        makeFinding(file, context, 'weak-session-secret', entry.line, entry.raw, entry.value, { key: entry.key })
       );
       continue;
     }
@@ -320,7 +379,7 @@ function detectWeakSecrets(file: ScannedFile, context: DetectionContext, finding
     if (key.includes('PASSWORD') && ['password', 'admin', '123456', 'default'].includes(value)) {
       pushFinding(
         findings,
-        makeFinding(file, context, 'weak-password', entry.line, entry.raw, entry.value)
+        makeFinding(file, context, 'weak-password', entry.line, entry.raw, entry.value, { key: entry.key })
       );
       continue;
     }
@@ -328,7 +387,7 @@ function detectWeakSecrets(file: ScannedFile, context: DetectionContext, finding
     if ((key.includes('API_KEY') || key.includes('TOKEN')) && ['dummy', 'example', 'test'].includes(value)) {
       pushFinding(
         findings,
-        makeFinding(file, context, 'dummy-api-key', entry.line, entry.raw, entry.value)
+        makeFinding(file, context, 'dummy-api-key', entry.line, entry.raw, entry.value, { key: entry.key })
       );
       continue;
     }
@@ -336,7 +395,7 @@ function detectWeakSecrets(file: ScannedFile, context: DetectionContext, finding
     if (isSuspiciousKey(key) && (PLACEHOLDER_VALUES.has(value) || value.includes('your_'))) {
       pushFinding(
         findings,
-        makeFinding(file, context, 'placeholder-secret', entry.line, entry.raw, entry.value)
+        makeFinding(file, context, 'placeholder-secret', entry.line, entry.raw, entry.value, { key: entry.key })
       );
     }
   }
@@ -348,37 +407,37 @@ function detectRuntimeSettings(file: ScannedFile, context: DetectionContext, fin
     const value = normalizeValue(entry.value);
 
     if ((key === 'DEBUG' || key === 'APP_DEBUG') && ['true', '1', 'yes'].includes(value)) {
-      pushFinding(findings, makeFinding(file, context, 'debug-enabled', entry.line, entry.raw, entry.value));
+      pushFinding(findings, makeFinding(file, context, 'debug-enabled', entry.line, entry.raw, entry.value, { key: entry.key }));
     }
 
     if (key === 'NODE_ENV' && value === 'development' && isProductionPath(file.relativePath)) {
       pushFinding(
         findings,
-        makeFinding(file, context, 'node-dev-production', entry.line, entry.raw, entry.value)
+        makeFinding(file, context, 'node-dev-production', entry.line, entry.raw, entry.value, { key: entry.key })
       );
     }
 
     if (key === 'FLASK_ENV' && value === 'development') {
-      pushFinding(findings, makeFinding(file, context, 'flask-dev-env', entry.line, entry.raw, entry.value));
+      pushFinding(findings, makeFinding(file, context, 'flask-dev-env', entry.line, entry.raw, entry.value, { key: entry.key }));
     }
 
     if (key === 'DJANGO_DEBUG' && ['true', '1', 'yes'].includes(value)) {
-      pushFinding(findings, makeFinding(file, context, 'django-debug', entry.line, entry.raw, entry.value));
+      pushFinding(findings, makeFinding(file, context, 'django-debug', entry.line, entry.raw, entry.value, { key: entry.key }));
     }
 
     if ((key === 'VERIFY_SSL' || key === 'SSL_VERIFY') && ['false', '0', 'no'].includes(value)) {
-      pushFinding(findings, makeFinding(file, context, 'ssl-disabled', entry.line, entry.raw, entry.value));
+      pushFinding(findings, makeFinding(file, context, 'ssl-disabled', entry.line, entry.raw, entry.value, { key: entry.key }));
     }
 
     if (key === 'TLS_REJECT_UNAUTHORIZED' && value === '0') {
-      pushFinding(findings, makeFinding(file, context, 'tls-disabled', entry.line, entry.raw, entry.value));
+      pushFinding(findings, makeFinding(file, context, 'tls-disabled', entry.line, entry.raw, entry.value, { key: entry.key }));
     }
 
     if (key === 'LOG_LEVEL' && value === 'debug') {
       const severity: Severity = isProductionPath(file.relativePath) ? 'medium' : 'low';
       pushFinding(
         findings,
-        makeFinding(file, context, 'debug-logging', entry.line, entry.raw, entry.value, { severity })
+        makeFinding(file, context, 'debug-logging', entry.line, entry.raw, entry.value, { severity, key: entry.key })
       );
     }
   }
@@ -397,14 +456,14 @@ function detectCors(file: ScannedFile, context: DetectionContext, findings: Find
       (value === '*' || value === '"*"')
     ) {
       wildcardEntries.push(entry);
-      pushFinding(findings, makeFinding(file, context, 'cors-wildcard', entry.line, entry.raw, entry.value));
+      pushFinding(findings, makeFinding(file, context, 'cors-wildcard', entry.line, entry.raw, entry.value, { key: entry.key }));
     }
 
     if (key === 'ALLOWED_ORIGINS' && value === '*') {
       wildcardEntries.push(entry);
       pushFinding(
         findings,
-        makeFinding(file, context, 'allowed-origins-wildcard', entry.line, entry.raw, entry.value)
+        makeFinding(file, context, 'allowed-origins-wildcard', entry.line, entry.raw, entry.value, { key: entry.key })
       );
     }
 
@@ -423,7 +482,8 @@ function detectCors(file: ScannedFile, context: DetectionContext, findings: Find
         'cors-credentials-wildcard',
         credential.line,
         credential.raw,
-        credential.value
+        credential.value,
+        { key: credential.key }
       )
     );
   }
@@ -455,6 +515,14 @@ function detectDockerfile(file: ScannedFile, context: DetectionContext, findings
 
     if (/^(COPY|ADD)\s+.*(?:^|\s)\.env(?:\s|$)/i.test(line)) {
       pushFinding(findings, makeFinding(file, context, 'docker-copy-dotenv', index + 1, raw));
+    }
+
+    if (!dockerignorePresent && /^FROM\s+/i.test(line)) {
+      pushFinding(findings, makeFinding(file, context, 'docker-missing-dockerignore', index + 1, raw));
+    }
+
+    if (/^ADD\s+https?:\/\//i.test(line)) {
+      pushFinding(findings, makeFinding(file, context, 'docker-add-remote-url', index + 1, raw));
     }
 
     if (/^COPY\s+\.\s+\./i.test(line) && !dockerignorePresent) {
@@ -512,8 +580,24 @@ function detectCompose(file: ScannedFile, context: DetectionContext, findings: F
     if (inlineSecret && !valueLooksFake(inlineSecret[2])) {
       pushFinding(
         findings,
-        makeFinding(file, context, 'compose-inline-secret', index + 1, raw, inlineSecret[2])
+        makeFinding(file, context, 'compose-inline-secret', index + 1, raw, inlineSecret[2], {
+          key: inlineSecret[1]
+        })
       );
+    }
+
+    if (/network_mode\s*:\s*["']?host["']?/i.test(raw)) {
+      pushFinding(findings, makeFinding(file, context, 'compose-host-network', index + 1, raw));
+    }
+
+    if (/image\s*:\s*["']?[^"'\s]+:latest["']?/i.test(raw)) {
+      pushFinding(findings, makeFinding(file, context, 'compose-latest-tag', index + 1, raw));
+    }
+
+    if (
+      /-\s*["']?(?:\/var\/run\/docker\.sock|\/etc|\/root|~\/\.ssh|[A-Za-z]:\\Users\\[^:]+\\.ssh)/i.test(raw)
+    ) {
+      pushFinding(findings, makeFinding(file, context, 'compose-unsafe-volume', index + 1, raw));
     }
   });
 }
@@ -575,6 +659,117 @@ function detectGithubActions(file: ScannedFile, context: DetectionContext, findi
   }
 }
 
+function detectEnvHygiene(file: ScannedFile, context: DetectionContext, findings: Finding[]): void {
+  if (file.kind !== 'env') {
+    return;
+  }
+
+  const seen = new Map<string, EnvEntry>();
+  for (const entry of file.env) {
+    if (!/^[A-Z_][A-Z0-9_]*$/.test(entry.key)) {
+      pushFinding(findings, makeFinding(file, context, 'env-invalid-key', entry.line, entry.raw, undefined, { key: entry.key }));
+    }
+
+    if (entry.value.trim().length === 0 && !isEnvExampleOrSchemaPath(file.relativePath)) {
+      pushFinding(findings, makeFinding(file, context, 'env-empty-value', entry.line, entry.raw, undefined, { key: entry.key }));
+    }
+
+    const quote = entry.value.trim()[0];
+    if ((quote === '"' || quote === "'") && !entry.value.trim().endsWith(quote)) {
+      pushFinding(findings, makeFinding(file, context, 'env-inconsistent-quotes', entry.line, entry.raw, undefined, { key: entry.key }));
+    }
+
+    const previous = seen.get(entry.key);
+    if (previous) {
+      pushFinding(findings, makeFinding(file, context, 'env-duplicate-key', entry.line, entry.raw, undefined, { key: entry.key }));
+    } else {
+      seen.set(entry.key, entry);
+    }
+  }
+
+  file.lines.forEach((raw, index) => {
+    const trimmed = raw.trim();
+    if (trimmed.length === 0 || trimmed.startsWith('#')) {
+      return;
+    }
+
+    if (!/^(?:export\s+)?[A-Za-z_][A-Za-z0-9_.-]*\s*=/.test(trimmed)) {
+      pushFinding(findings, makeFinding(file, context, 'env-malformed-line', index + 1, raw));
+    }
+  });
+}
+
+function detectGitlabCi(file: ScannedFile, context: DetectionContext, findings: Finding[]): void {
+  if (!isGitlabCiPath(file.relativePath)) {
+    return;
+  }
+
+  file.lines.forEach((raw, index) => {
+    if (/echo\s+.*\$(?:[A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|API_KEY)[A-Z0-9_]*)/i.test(raw)) {
+      pushFinding(findings, makeFinding(file, context, 'gitlab-echo-secret', index + 1, raw));
+    }
+
+    if (/^\s*image\s*:\s*["']?[^"'\s:]+(?::latest)?["']?\s*$/i.test(raw)) {
+      pushFinding(findings, makeFinding(file, context, 'gitlab-unpinned-image', index + 1, raw));
+    }
+  });
+}
+
+function detectCircleCi(file: ScannedFile, context: DetectionContext, findings: Finding[]): void {
+  if (!isCircleCiPath(file.relativePath)) {
+    return;
+  }
+
+  file.lines.forEach((raw, index) => {
+    if (/echo\s+.*\$(?:[A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|API_KEY)[A-Z0-9_]*)/i.test(raw)) {
+      pushFinding(findings, makeFinding(file, context, 'circleci-echo-secret', index + 1, raw));
+    }
+
+    if (/context\s*:\s*(?:org-global|global|organization|production)/i.test(raw)) {
+      pushFinding(findings, makeFinding(file, context, 'circleci-broad-context', index + 1, raw));
+    }
+  });
+}
+
+function detectUnsafeSchemaDefaults(file: ScannedFile, context: DetectionContext, findings: Finding[]): void {
+  if (!isEnvExampleOrSchemaPath(file.relativePath)) {
+    return;
+  }
+
+  for (const entry of file.env) {
+    const value = normalizeValue(entry.value);
+    if (
+      value === 'development' ||
+      value === 'true' ||
+      value === '*' ||
+      value === '0' ||
+      (isSuspiciousKey(entry.key) && !valueLooksFake(entry.value))
+    ) {
+      pushFinding(
+        findings,
+        makeFinding(file, context, 'env-schema-unsafe-default', entry.line, entry.raw, entry.value, {
+          key: entry.key
+        })
+      );
+    }
+  }
+}
+
+function detectCustomRules(file: ScannedFile, context: DetectionContext, findings: Finding[]): void {
+  for (const rule of context.customRules) {
+    if (!picomatch.isMatch(file.relativePath, rule.file_globs)) {
+      continue;
+    }
+
+    const regex = new RegExp(rule.pattern, 'gim');
+    for (const match of file.content.matchAll(regex)) {
+      const index = match.index ?? 0;
+      const line = lineNumberForIndex(file.content, index);
+      pushFinding(findings, makeCustomFinding(file, context, rule, line, linePreview(file, line, match[0])));
+    }
+  }
+}
+
 function detectEntropy(file: ScannedFile, context: DetectionContext, findings: Finding[]): void {
   if (!context.entropyEnabled) {
     return;
@@ -592,7 +787,7 @@ function detectEntropy(file: ScannedFile, context: DetectionContext, findings: F
 
     pushFinding(
       findings,
-      makeFinding(file, context, 'high-entropy-value', entry.line, entry.raw, entry.value)
+      makeFinding(file, context, 'high-entropy-value', entry.line, entry.raw, entry.value, { key: entry.key })
     );
   }
 }
@@ -605,9 +800,14 @@ export function detectFindings(file: ScannedFile, context: DetectionContext): Fi
   detectWeakSecrets(file, context, findings);
   detectRuntimeSettings(file, context, findings);
   detectCors(file, context, findings);
+  detectEnvHygiene(file, context, findings);
+  detectUnsafeSchemaDefaults(file, context, findings);
   detectDockerfile(file, context, findings);
   detectCompose(file, context, findings);
   detectGithubActions(file, context, findings);
+  detectGitlabCi(file, context, findings);
+  detectCircleCi(file, context, findings);
+  detectCustomRules(file, context, findings);
   detectEntropy(file, context, findings);
 
   return findings

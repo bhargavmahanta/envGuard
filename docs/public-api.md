@@ -1,6 +1,6 @@
 # Public API Surface
 
-EnvGuard treats these interfaces as stable for V1.0.
+EnvGuard treats these interfaces as stable for V1.x.
 
 ## Package and Command
 
@@ -10,9 +10,13 @@ EnvGuard treats these interfaces as stable for V1.0.
 ## Commands
 
 - `envguard scan [target]`
+- `envguard scan --staged`
+- `envguard scan --changed [base-ref]`
+- `envguard baseline audit [target]`
 - `envguard init`
 - `envguard rules`
 - `envguard doctor`
+- `envguard doctor --json`
 
 ## Config Files
 
@@ -26,6 +30,21 @@ EnvGuard treats these interfaces as stable for V1.0.
 - `json`
 - `markdown`
 - `sarif`
+- `github`
+
+## Config Keys
+
+- `severity.fail_on`
+- `entropy.enabled`
+- `entropy.threshold`
+- `output.mask`
+- `rules.disabled`
+- `rules.packs`
+- `rules.custom[]`
+- `allow[]`
+- `scan.max_file_mb`
+- `scan.timeout_seconds`
+- `scan.include_gitignored`
 
 ## Stable Fields
 
@@ -55,6 +74,7 @@ Findings include:
 - `preview`
 - `message`
 - `fix`
+- `key`
 
 ## Rule IDs
 

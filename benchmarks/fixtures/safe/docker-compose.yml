@@ -1,0 +1,5 @@
+services:
+  app:
+    image: node:20
+    ports:
+      - "127.0.0.1:3000:3000"
