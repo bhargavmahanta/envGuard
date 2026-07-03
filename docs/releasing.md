@@ -40,6 +40,8 @@ The GitHub release workflow publishes to npm when a GitHub release is published.
 
 If trusted publishing is not available, configure `NPM_TOKEN` as a repository secret.
 
+While the GitHub repository is private, the release workflow publishes without npm provenance because npm only accepts GitHub Actions provenance for public source repositories. Re-enable `--provenance` after making the repository public.
+
 Manual fallback:
 
 ```bash

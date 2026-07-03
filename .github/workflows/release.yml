@@ -42,4 +42,4 @@ jobs:
         run: npm run release:dry
 
       - if: steps.package.outputs.published == 'false'
-        run: npm publish --provenance --access public
+        run: npm publish --access public
