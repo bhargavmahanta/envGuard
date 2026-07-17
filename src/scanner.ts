@@ -228,10 +228,18 @@ async function resolveTargetFiles(
   }
 
   const root = await resolveScanRoot(targetPath, cwd);
+  const requestedTarget = path.resolve(cwd, targetPath);
+  const targetStat = await fs.lstat(requestedTarget);
+  const requestedRoot = targetStat.isDirectory() ? requestedTarget : path.dirname(requestedTarget);
   const files: string[] = [];
   const ignore = (await resolveIgnorePatterns(root, config, ignorePath)).map(normalizePath);
   for (const file of targetFiles) {
-    const absolute = path.resolve(cwd, file);
+    const requestedFile = path.resolve(cwd, file);
+    if (!isPathInside(requestedRoot, requestedFile)) {
+      throw new InvalidScanOptionsError(`Target file is outside the scan root: ${file}.`);
+    }
+
+    const absolute = path.resolve(root, path.relative(requestedRoot, requestedFile));
     if (!isPathInside(root, absolute)) {
       throw new InvalidScanOptionsError(`Target file is outside the scan root: ${file}.`);
     }
