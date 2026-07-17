@@ -131,6 +131,7 @@ export interface ScannedFile {
   lines: string[];
   env: EnvEntry[];
   yaml?: unknown;
+  errors?: ScanError[];
 }
 
 export interface ScanOptions {

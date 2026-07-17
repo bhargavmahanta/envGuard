@@ -2,12 +2,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import picomatch from 'picomatch';
 import { applyBaseline, defaultBaselinePath, findingFingerprint, loadBaseline } from './baseline.js';
-import { DEFAULT_EXCLUDE_PATTERNS, REPORT_SCHEMA_VERSION, VERSION } from './defaults.js';
+import { REPORT_SCHEMA_VERSION, VERSION } from './defaults.js';
 import { loadConfig, mergeConfig } from './config.js';
 import { assertScanOptions, normalizeScanInvocation } from './core/options.js';
 import { dedupeFindings } from './dedupe.js';
 import { detectFindings } from './detector.js';
-import { ScanAbortedError } from './errors.js';
+import { InvalidScanOptionsError, ScanAbortedError } from './errors.js';
 import { maskSensitivePreview } from './masking.js';
 import { parseScannedFile } from './parser.js';
 import { calculateRiskScore } from './riskScore.js';
@@ -18,13 +18,14 @@ import {
   type EnvGuardConfig,
   type EnvEntry,
   type Finding,
+  type ScanError,
   type ScannedFile,
   type ScanOptions,
   type ScanResult,
   type Severity
 } from './types.js';
-import { resolveScanRoot, discoverFiles } from './walk.js';
-import { normalizePath } from './utils/path.js';
+import { discoverFiles, resolveIgnorePatterns, resolveScanRoot } from './walk.js';
+import { isPathInside, normalizePath } from './utils/path.js';
 
 function sortFindings(a: Finding, b: Finding): number {
   const severityDiff = SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity];
@@ -219,7 +220,8 @@ async function resolveTargetFiles(
   targetPath: string,
   cwd: string,
   config: EnvGuardConfig,
-  targetFiles?: string[]
+  targetFiles?: string[],
+  ignorePath?: string
 ): Promise<{ root: string; files: string[] }> {
   if (!targetFiles) {
     throw new Error('targetFiles are required');
@@ -227,18 +229,19 @@ async function resolveTargetFiles(
 
   const root = await resolveScanRoot(targetPath, cwd);
   const files: string[] = [];
-  const ignore = [...DEFAULT_EXCLUDE_PATTERNS, ...config.exclude].map(normalizePath);
+  const ignore = (await resolveIgnorePatterns(root, config, ignorePath)).map(normalizePath);
   for (const file of targetFiles) {
     const absolute = path.resolve(cwd, file);
+    if (!isPathInside(root, absolute)) {
+      throw new InvalidScanOptionsError(`Target file is outside the scan root: ${file}.`);
+    }
+
     const relative = normalizePath(path.relative(root, absolute));
     if (!picomatch.isMatch(relative, config.include) || picomatch.isMatch(relative, ignore)) {
       continue;
     }
 
-    const stat = await fs.stat(absolute);
-    if (stat.isFile()) {
-      files.push(absolute);
-    }
+    files.push(absolute);
   }
 
   return {
@@ -270,36 +273,142 @@ export async function scan(
 
   const ignorePath = options.ignorePath ? path.resolve(cwd, options.ignorePath) : undefined;
   const { root, files } = options.targetFiles
-    ? await resolveTargetFiles(targetPath, cwd, config, options.targetFiles)
+    ? await resolveTargetFiles(targetPath, cwd, config, options.targetFiles, ignorePath)
     : await discoverFiles(targetPath, cwd, config, ignorePath);
   const disabledRules = new Set(config.rules.disabled);
 
   const findings: Finding[] = [];
   const scannedFiles: ScannedFile[] = [];
+  const errors: ScanError[] = [];
   let skippedFiles = 0;
+  let filesScanned = 0;
   const startedAtMs = startedAt.getTime();
   const timeoutMs = options.timeoutMs ?? (config.scan.timeout_seconds > 0 ? config.scan.timeout_seconds * 1000 : 0);
   const maximumFileSizeBytes = options.maximumFileSizeBytes ?? config.scan.max_file_mb * 1024 * 1024;
 
-  for (const filePath of files) {
+  for (const [fileIndex, filePath] of files.entries()) {
     if (options.signal?.aborted) {
       throw new ScanAbortedError();
     }
 
     if (timeoutMs > 0 && Date.now() - startedAtMs > timeoutMs) {
+      skippedFiles += files.length - fileIndex;
+      errors.push({
+        code: 'SCAN_TIMEOUT',
+        message: `Scan timed out after ${timeoutMs}ms.`,
+        recoverable: true
+      });
+      break;
+    }
+
+    const relativePath = normalizePath(path.relative(root, filePath));
+    let stat;
+    try {
+      stat = await fs.lstat(filePath);
+    } catch (error) {
+      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+      errors.push({
+        code: code === 'ENOENT' ? 'FILE_NOT_FOUND' : 'FILE_ACCESS_ERROR',
+        message:
+          code === 'ENOENT'
+            ? `File disappeared before it could be scanned: ${relativePath}.`
+            : `Could not access file: ${relativePath}.`,
+        filePath: relativePath,
+        recoverable: true
+      });
       skippedFiles += 1;
       continue;
     }
 
-    const stat = await fs.stat(filePath);
+    if (stat.isSymbolicLink()) {
+      errors.push({
+        code: 'SYMLINK_SKIPPED',
+        message: `Skipped symbolic link: ${relativePath}.`,
+        filePath: relativePath,
+        recoverable: true
+      });
+      skippedFiles += 1;
+      continue;
+    }
+
+    if (!stat.isFile()) {
+      skippedFiles += 1;
+      continue;
+    }
+
+    try {
+      const realPath = await fs.realpath(filePath);
+      if (!isPathInside(root, realPath)) {
+        errors.push({
+          code: 'SYMLINK_ESCAPE',
+          message: `Skipped file resolving outside the scan root: ${relativePath}.`,
+          filePath: relativePath,
+          recoverable: true
+        });
+        skippedFiles += 1;
+        continue;
+      }
+    } catch {
+      errors.push({
+        code: 'FILE_ACCESS_ERROR',
+        message: `Could not resolve file: ${relativePath}.`,
+        filePath: relativePath,
+        recoverable: true
+      });
+      skippedFiles += 1;
+      continue;
+    }
+
     if (stat.size > maximumFileSizeBytes) {
+      errors.push({
+        code: 'FILE_TOO_LARGE',
+        message: `Skipped file larger than ${maximumFileSizeBytes} bytes: ${relativePath}.`,
+        filePath: relativePath,
+        recoverable: true
+      });
       skippedFiles += 1;
       continue;
     }
 
-    const content = await fs.readFile(filePath, 'utf8');
+    let content: string;
+    try {
+      content = await fs.readFile(filePath, 'utf8');
+    } catch (error) {
+      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+      errors.push({
+        code: code === 'ENOENT' ? 'FILE_NOT_FOUND' : 'FILE_READ_ERROR',
+        message:
+          code === 'ENOENT'
+            ? `File disappeared before it could be read: ${relativePath}.`
+            : `Could not read file: ${relativePath}.`,
+        filePath: relativePath,
+        recoverable: true
+      });
+      skippedFiles += 1;
+      continue;
+    }
+
+    if (content.includes('\uFFFD')) {
+      errors.push({
+        code: 'UNSUPPORTED_ENCODING',
+        message: `Skipped file with unsupported text encoding: ${relativePath}.`,
+        filePath: relativePath,
+        recoverable: true
+      });
+      skippedFiles += 1;
+      continue;
+    }
+
+    if (options.signal?.aborted) {
+      throw new ScanAbortedError();
+    }
+
     const scannedFile = parseScannedFile(root, filePath, content);
     scannedFiles.push(scannedFile);
+    filesScanned += 1;
+    if (scannedFile.errors) {
+      errors.push(...scannedFile.errors);
+    }
     findings.push(
       ...detectFindings(scannedFile, {
         root,
@@ -342,7 +451,7 @@ export async function scan(
   );
 
   const completedAt = new Date();
-  const summary = summarize(visibleFindings, files.length - skippedFiles, skippedFiles);
+  const summary = summarize(visibleFindings, filesScanned, skippedFiles);
   const passed = !shouldFail({ findings: visibleFindings } as ScanResult, failOn);
 
   return {
@@ -363,7 +472,8 @@ export async function scan(
     summary,
     findings: visibleFindings,
     passed,
-    recommendedExitCode: passed ? 0 : 1
+    recommendedExitCode: passed ? 0 : 1,
+    errors: errors.length > 0 ? errors : undefined
   };
 }
 

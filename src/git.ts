@@ -18,8 +18,7 @@ async function gitOutput(cwd: string, args: string[]): Promise<string> {
 async function existingFiles(cwd: string, output: string): Promise<string[]> {
   const files = output
     .split('\0')
-    .map((file) => file.trim())
-    .filter(Boolean);
+    .filter((file) => file.length > 0);
   const existing: string[] = [];
 
   for (const file of files) {
@@ -49,13 +48,23 @@ export async function getStagedFiles(cwd: string): Promise<string[]> {
 }
 
 export async function getChangedFiles(cwd: string, baseRef?: string): Promise<string[]> {
-  const args = ['diff', '--name-only', '--diff-filter=ACMRTUXB', '-z'];
+  const outputs: string[] = [];
   if (baseRef && baseRef !== 'HEAD') {
-    args.push(`${baseRef}...HEAD`);
-  } else {
-    args.push('HEAD');
+    outputs.push(
+      await gitOutput(cwd, [
+        'diff',
+        '--name-only',
+        '--diff-filter=ACMRTUXB',
+        '-z',
+        `${baseRef}...HEAD`
+      ])
+    );
   }
 
-  const output = await gitOutput(cwd, args);
-  return existingFiles(cwd, output);
+  outputs.push(
+    await gitOutput(cwd, ['diff', '--name-only', '--diff-filter=ACMRTUXB', '-z', 'HEAD'])
+  );
+  outputs.push(await gitOutput(cwd, ['ls-files', '--others', '--exclude-standard', '-z']));
+
+  return existingFiles(cwd, outputs.join('\0'));
 }
