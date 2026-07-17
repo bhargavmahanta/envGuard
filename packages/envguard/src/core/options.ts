@@ -15,6 +15,11 @@ function mergePartialConfig(
     output: base?.output || overrides?.output ? { ...base?.output, ...overrides?.output } : undefined,
     rules: base?.rules || overrides?.rules ? { ...base?.rules, ...overrides?.rules } : undefined,
     scan: base?.scan || overrides?.scan ? { ...base?.scan, ...overrides?.scan } : undefined,
+    extends: overrides?.extends
+      ? [...overrides.extends]
+      : base?.extends
+        ? [...base.extends]
+        : undefined,
     include:
       overrides?.include || base?.include
         ? [...(overrides?.include ?? base?.include ?? [])]

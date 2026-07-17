@@ -4,6 +4,8 @@ import yaml from 'js-yaml';
 import { z } from 'zod';
 import { CONFIG_FILENAMES, DEFAULT_CONFIG } from './defaults.js';
 import { ConfigError } from './errors.js';
+import { resolvePresetConfig } from './presets.js';
+import { RULES } from './rules/catalog.js';
 import type {
   EnvGuardConfig,
   LoadedConfig,
@@ -41,6 +43,7 @@ const ConfigSchema = z
         fail_on: SeveritySchema.optional()
       })
       .optional(),
+    extends: z.array(z.string().min(1)).optional(),
     entropy: z
       .object({
         enabled: z.boolean().optional(),
@@ -105,6 +108,10 @@ function validateConfig(value: unknown, filePath?: string): PartialEnvGuardConfi
   }
 
   return parsed.data;
+}
+
+export function defineConfig(config: PartialEnvGuardConfig): PartialEnvGuardConfig {
+  return validateConfig(config);
 }
 
 function cloneRules(config: EnvGuardConfig['rules']): EnvGuardConfig['rules'] {
@@ -181,8 +188,21 @@ export async function loadConfig(cwdOrOptions: string | LoadConfigOptions = {}):
   }
 
   const programmaticConfig = validateConfig(options.config ?? {});
+  const filePresetConfig = await resolvePresetConfig(
+    fileConfig.extends,
+    configPath ? path.dirname(configPath) : cwd
+  );
+  const programmaticPresetConfig = await resolvePresetConfig(programmaticConfig.extends, cwd);
+  const config = mergeConfig(filePresetConfig, fileConfig, programmaticPresetConfig, programmaticConfig);
+  const ruleIds = new Set(RULES.map((rule) => rule.id));
+  for (const rule of config.rules.custom) {
+    if (ruleIds.has(rule.id)) {
+      throw new ConfigError(`Duplicate EnvGuard rule ID: ${rule.id}.`, 'CONFIG_DUPLICATE_RULE_ID');
+    }
+    ruleIds.add(rule.id);
+  }
   return {
-    config: mergeConfig(fileConfig, programmaticConfig),
+    config,
     configPath
   };
 }

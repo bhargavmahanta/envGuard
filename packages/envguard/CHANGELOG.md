@@ -4,13 +4,8 @@
 
 ### Added
 
-- Added npm workspaces, independent Changesets releases, and four official declarative presets.
-- Added safe `extends` resolution for local and npm presets.
-- Exported `defineConfig`, `defineRule`, `definePreset`, and typed preset errors.
-
-### Security
-
-- Rejects executable and remote presets, cycles, package path escapes, excessive nesting, and duplicate rule IDs.
+- Added safe declarative preset composition and public preset definition helpers.
+- Added npm workspace support and packed preset consumers.
 
 ## [1.2.1] - Unreleased
 

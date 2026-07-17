@@ -1,0 +1,4 @@
+{
+  "rules": {"packs": ["node"]},
+  "include": [".env", ".env.*", "**/.env", "**/.env.*", "**/config.{js,ts,json,yml,yaml}", "**/package.json"]
+}

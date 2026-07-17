@@ -16,6 +16,24 @@ export class ConfigError extends EnvGuardError {
   }
 }
 
+export class PresetResolutionError extends ConfigError {
+  constructor(message: string, code = 'PRESET_RESOLUTION_FAILED', cause?: unknown) {
+    super(message, code, cause);
+  }
+}
+
+export class PresetValidationError extends PresetResolutionError {
+  constructor(message: string, cause?: unknown) {
+    super(message, 'PRESET_INVALID', cause);
+  }
+}
+
+export class PresetCycleError extends PresetResolutionError {
+  constructor(message: string) {
+    super(message, 'PRESET_CYCLE');
+  }
+}
+
 export class TargetNotFoundError extends EnvGuardError {
   constructor(message: string, cause?: unknown) {
     super(message, 'TARGET_NOT_FOUND', cause);

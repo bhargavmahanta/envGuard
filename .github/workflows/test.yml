@@ -36,13 +36,13 @@ jobs:
       - run: npm run build
 
       - name: Run sample scan
-        run: node dist/cli.js scan examples/vulnerable-project --format json --output sample-report.json
+        run: node packages/envguard/dist/cli.js scan examples/vulnerable-project --format json --output sample-report.json
 
       - name: Test packed package consumers
-        run: npm run test:consumers
+        run: npm run test:package
 
       - name: Check npm package contents
-        run: npm pack --dry-run
+        run: npm pack --dry-run --workspaces
 
   node-compatibility:
     runs-on: ubuntu-latest

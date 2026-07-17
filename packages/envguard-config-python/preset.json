@@ -1,0 +1,4 @@
+{
+  "rules": {"packs": ["python"]},
+  "include": [".env", ".env.*", "**/.env", "**/.env.*", "**/settings.py", "**/config.py", "**/application.{yml,yaml}"]
+}

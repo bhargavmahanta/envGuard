@@ -20,23 +20,26 @@ npm audit signatures
 
 ## Versioning
 
-Use semantic versioning:
+Add a reviewed changeset for every user-visible package change:
 
 ```bash
-npm version patch
-npm version minor
-npm version major
+npm run changeset
 ```
 
-For release candidates:
+The release workflow creates a version pull request and independently updates changed package
+versions, internal dependency ranges, and changelogs. Merging that pull request publishes all new
+workspace versions through npm trusted publishing.
+
+For a local release preview:
 
 ```bash
-npm version prerelease --preid rc
+npm run release:version
+npm run release:dry
 ```
 
 ## Publishing
 
-The GitHub release workflow publishes to npm when a GitHub release is published. Prefer npm trusted publishing with:
+The GitHub release workflow publishes changed workspaces after the Changesets version pull request is merged. Configure npm trusted publishing for every public workspace with:
 
 - package: `@bhargavmahanta/envguard`
 - owner: `bhargavmahanta`

@@ -1,16 +1,17 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   id-token: write
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,23 +24,13 @@ jobs:
           package-manager-cache: false
 
       - run: npm ci
+      - run: npm run release:dry
 
-      - id: package
-        shell: bash
-        run: |
-          NAME=$(node -p "require('./package.json').name")
-          VERSION=$(node -p "require('./package.json').version")
-          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
-            echo "published=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "published=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - if: steps.package.outputs.published == 'true'
-        run: npm run typecheck && npm run lint && npm test && npm audit && npm run build && npm pack --dry-run
-
-      - if: steps.package.outputs.published == 'false'
-        run: npm run release:dry
-
-      - if: steps.package.outputs.published == 'false'
-        run: npm publish --provenance --access public
+      - uses: changesets/action@v1
+        with:
+          version: npm run release:version
+          publish: npm run release:publish
+          title: "chore: release envguard packages"
+          commit: "chore: release envguard packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

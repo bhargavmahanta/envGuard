@@ -1,94 +1,26 @@
 {
-  "name": "@bhargavmahanta/envguard",
-  "version": "1.2.1",
-  "description": "Security linting for env, Docker, CI, and runtime configuration.",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "author": "Bhargav Mahanta",
-  "license": "MIT",
-  "homepage": "https://github.com/bhargavmahanta/envGuard#readme",
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/bhargavmahanta"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bhargavmahanta/envGuard.git"
-  },
-  "bugs": {
-    "url": "https://github.com/bhargavmahanta/envGuard/issues"
-  },
-  "bin": {
-    "envguard": "dist/cli.js"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./reporters": {
-      "types": "./dist/reporters/index.d.ts",
-      "import": "./dist/reporters/index.js",
-      "require": "./dist/reporters/index.cjs"
-    },
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+  "name": "envguard-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "EnvGuard npm workspace and release tooling.",
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "dev": "tsx src/cli-entry.ts",
-    "build": "tsup --config tsup.config.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:consumers": "node test/package-consumers.mjs",
-    "test:package": "npm run build && npm run test:consumers",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
-    "security:env": "tsx src/cli.ts scan . --ci --fail-on high",
-    "release:dry": "npm run typecheck && npm run lint && npm test && npm audit && npm run test:package && npm pack --dry-run && npm publish --dry-run --access public"
-  },
-  "keywords": [
-    "security",
-    "devsecops",
-    "appsec",
-    "secrets-scanner",
-    "dotenv",
-    "cli",
-    "typescript",
-    "github-actions",
-    "docker-security",
-    "configuration-security"
-  ],
-  "dependencies": {
-    "chalk": "^5.3.0",
-    "commander": "^12.1.0",
-    "fast-glob": "^3.3.2",
-    "js-yaml": "^4.1.0",
-    "ora": "^8.0.1",
-    "picomatch": "^4.0.2",
-    "zod": "^3.23.8"
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspace @bhargavmahanta/envguard",
+    "lint": "npm run lint --workspace @bhargavmahanta/envguard",
+    "typecheck": "npm run typecheck --workspace @bhargavmahanta/envguard",
+    "test:package": "npm run test:package --workspace @bhargavmahanta/envguard",
+    "security:env": "npm run security:env --workspace @bhargavmahanta/envguard",
+    "changeset": "changeset",
+    "release:version": "changeset version",
+    "release:publish": "changeset publish",
+    "release:dry": "npm run typecheck && npm run lint && npm test && npm audit && npm run test:package && npm pack --dry-run --workspaces"
   },
   "devDependencies": {
-    "@eslint/js": "^9.5.0",
-    "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.14.8",
-    "eslint": "^9.5.0",
-    "prettier": "^3.3.2",
-    "tsup": "^8.1.0",
-    "tsx": "^4.15.7",
-    "typescript": "^5.5.2",
-    "typescript-eslint": "^8.0.0",
-    "vitest": "^4.1.9"
+    "@changesets/changelog-github": "^0.5.2",
+    "@changesets/cli": "^2.29.7"
   },
   "overrides": {
     "esbuild": "^0.28.1"

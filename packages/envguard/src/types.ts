@@ -68,12 +68,23 @@ export interface EnvGuardConfig {
 }
 
 export interface PartialEnvGuardConfig {
+  extends?: string[];
   severity?: Partial<EnvGuardConfig['severity']>;
   entropy?: Partial<EnvGuardConfig['entropy']>;
   output?: Partial<EnvGuardConfig['output']>;
   rules?: Partial<EnvGuardConfig['rules']>;
   allow?: AllowConfig[];
   scan?: Partial<EnvGuardConfig['scan']>;
+  include?: string[];
+  exclude?: string[];
+}
+
+export interface EnvGuardPreset {
+  extends?: string[];
+  rules?: {
+    packs?: string[];
+    custom?: CustomRuleConfig[];
+  };
   include?: string[];
   exclude?: string[];
 }

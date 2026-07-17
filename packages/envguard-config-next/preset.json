@@ -1,0 +1,4 @@
+{
+  "extends": ["@bhargavmahanta/envguard-config-node"],
+  "include": [".env", ".env.*", "**/.env", "**/.env.*", "**/next.config.{js,mjs,cjs,ts}", "**/middleware.{js,ts}"]
+}

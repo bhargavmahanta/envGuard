@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
+const workspaceRoot = path.resolve(projectRoot, '..', '..');
 const fixturesRoot = path.join(projectRoot, 'test', 'fixtures', 'consumers');
 const npmCliPath = process.env.npm_execpath;
 if (!npmCliPath) throw new Error('test:consumers must be run through npm.');
@@ -78,7 +79,7 @@ try {
   await run(process.execPath, ['index.cjs'], commonjs);
 
   const typescript = await installFixture('typescript', tarballPath, tempRoot);
-  const tscPath = path.join(projectRoot, 'node_modules', 'typescript', 'bin', 'tsc');
+  const tscPath = path.join(workspaceRoot, 'node_modules', 'typescript', 'bin', 'tsc');
   await run(process.execPath, [tscPath, '--project', 'tsconfig.json'], typescript);
   await run(process.execPath, ['dist/index.js'], typescript);
 
