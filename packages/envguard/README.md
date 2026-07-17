@@ -221,6 +221,7 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [Public API surface](https://github.com/bhargavmahanta/envGuard/blob/main/docs/public-api.md)
 - [SDK guide](https://github.com/bhargavmahanta/envGuard/blob/main/docs/sdk.md)
 - [Presets](https://github.com/bhargavmahanta/envGuard/blob/main/docs/presets.md)
+- [Container image](https://github.com/bhargavmahanta/envGuard/blob/main/docs/containers.md)
 - [Presets](https://github.com/bhargavmahanta/envGuard/blob/main/docs/presets.md)
 - [Agent integration](https://github.com/bhargavmahanta/envGuard/blob/main/docs/agent-integration.md)
 - [Future MCP architecture](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md)

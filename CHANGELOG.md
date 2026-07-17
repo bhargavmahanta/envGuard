@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.4.0] - Unreleased
+
+### Added
+
+- Added `envguard init --preset` for official project presets.
+- Added multi-architecture GHCR publishing with SBOM, provenance, and vulnerability scanning.
+- Added current CI recipes and public preset examples.
+
+## [1.4.0] - Unreleased
+
+### Added
+
+- Added `envguard init --preset` for official project presets.
+- Added multi-architecture GHCR publishing with SBOM, provenance, and vulnerability scanning.
+- Added current CI recipes and public preset examples.
+
 ## [1.3.0] - Unreleased
 
 ### Added

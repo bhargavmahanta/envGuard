@@ -1,9 +1,16 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
+import { InvalidScanOptionsError } from '../../errors.js';
 import { reportCommandError, type CliContext } from '../context.js';
 
-const defaultConfig = `severity:
+const PRESETS = ['node', 'next', 'python', 'docker'] as const;
+
+function configTemplate(preset?: string): string {
+  const presetConfig = preset
+    ? `extends:\n  - "@bhargavmahanta/envguard-config-${preset}"\n\n`
+    : '';
+  return `${presetConfig}severity:
   fail_on: high
 
 entropy:
@@ -33,6 +40,7 @@ scan:
 exclude:
   - docs/fixtures/
 `;
+}
 
 const defaultIgnore = `node_modules/
 dist/
@@ -55,12 +63,16 @@ export function registerInitCommand(program: Command, context: CliContext): void
   program
     .command('init')
     .description('Create envguard.config.yml and .envguardignore templates.')
-    .action(async () => {
+    .option('--preset <name>', 'use an official node, next, python, or docker preset')
+    .action(async (options: { preset?: string }) => {
       try {
+        if (options.preset && !PRESETS.includes(options.preset as (typeof PRESETS)[number])) {
+          throw new InvalidScanOptionsError(`Unknown preset ${options.preset}. Choose node, next, python, or docker.`);
+        }
         const cwd = process.cwd();
         const configStatus = await writeIfMissing(
           path.join(cwd, 'envguard.config.yml'),
-          defaultConfig
+          configTemplate(options.preset)
         );
         const ignoreStatus = await writeIfMissing(path.join(cwd, '.envguardignore'), defaultIgnore);
         context.io.stdout(`envguard.config.yml: ${configStatus}`);

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0] - Unreleased
+
+### Added
+
+- Added `envguard init --preset <node|next|python|docker>`.
+
+## [1.4.0] - Unreleased
+
+### Added
+
+- Added `envguard init --preset <node|next|python|docker>`.
+
 ## [1.3.0] - Unreleased
 
 ### Added

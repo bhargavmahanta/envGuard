@@ -119,4 +119,17 @@ describe('CLI compatibility', () => {
     expect(JSON.parse(doctor.stdout)).toMatchObject({ tool: 'envguard', ok: true });
     expect(JSON.parse(audit.stdout)).toHaveProperty('stale');
   });
+
+  it('initializes official presets without overwriting existing configuration', async () => {
+    await fs.rm(path.join(tmpDir, 'envguard.config.yml'), { force: true });
+    const initialized = await runCli(['init', '--preset', 'next'], tmpDir);
+    const config = await fs.readFile(path.join(tmpDir, 'envguard.config.yml'), 'utf8');
+    const repeated = await runCli(['init', '--preset', 'docker'], tmpDir);
+    const invalid = await runCli(['init', '--preset', 'unknown'], tmpDir);
+
+    expect(initialized.exitCode).toBe(0);
+    expect(config).toContain('@bhargavmahanta/envguard-config-next');
+    expect(repeated.stdout).toContain('envguard.config.yml: exists');
+    expect(invalid.exitCode).toBe(2);
+  });
 });
