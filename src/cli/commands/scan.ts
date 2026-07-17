@@ -4,7 +4,7 @@ import { Command, InvalidArgumentError } from 'commander';
 import ora from 'ora';
 import { defaultBaselinePath, writeBaseline } from '../../baseline.js';
 import { getChangedFiles, getStagedFiles } from '../../git.js';
-import { scan } from '../../index.js';
+import { loadConfig, scan } from '../../index.js';
 import { renderReport } from '../../reporter.js';
 import { SEVERITIES, type OutputFormat, type Severity } from '../../types.js';
 import { reportCommandError, type CliContext } from '../context.js';
@@ -90,6 +90,7 @@ export function registerScanCommand(program: Command, context: CliContext): void
         }
 
         const cwd = process.cwd();
+        const loaded = await loadConfig({ cwd });
         const baselinePath = path.resolve(options.baseline ?? defaultBaselinePath(cwd));
         const targetFiles = options.staged
           ? await getStagedFiles(cwd)
@@ -108,7 +109,10 @@ export function registerScanCommand(program: Command, context: CliContext): void
           failOn: options.failOn,
           maskSecrets: options.agent ? true : undefined
         });
-        const output = renderReport(result, format);
+        const output = renderReport(result, format, {
+          color: !options.agent && options.color !== false && process.stdout.isTTY,
+          maskSecrets: options.agent ? true : loaded.config.output.mask
+        });
 
         spinner?.succeed('Scan complete');
         if (options.agent) {

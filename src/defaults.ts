@@ -1,6 +1,7 @@
 import type { EnvGuardConfig } from './types.js';
+import packageMetadata from '../package.json' with { type: 'json' };
 
-export const VERSION = '1.1.0';
+export const VERSION = packageMetadata.version;
 export const REPORT_SCHEMA_VERSION = '1.0.0';
 export const DEFAULT_BASELINE_FILENAME = '.envguard-baseline.json';
 

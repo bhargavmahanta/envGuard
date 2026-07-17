@@ -7,6 +7,13 @@ import {
   renderSarifReport,
   renderTerminalReport
 } from '../src/reporter.js';
+import {
+  formatGitHubReport,
+  formatJsonReport,
+  formatMarkdownReport,
+  formatSarifReport,
+  formatTerminalReport
+} from '../src/reporters/index.js';
 
 const result: ScanResult = {
   tool: 'envguard',
@@ -47,5 +54,27 @@ describe('reporter compatibility', () => {
     expect(renderMarkdownReport(result)).toContain('# EnvGuard Report');
     expect(JSON.parse(renderSarifReport(result))).toMatchObject({ version: '2.1.0' });
     expect(renderGithubReport(result)).toContain('::error file=.env,line=1');
+  });
+
+  it('masks unsafe input by default without mutating the result', () => {
+    const unsafe = structuredClone(result);
+    unsafe.findings[0].preview = 'DATABASE_URL=postgres://admin:reporter-secret@localhost/app';
+    const before = JSON.stringify(unsafe);
+    const outputs = [
+      formatTerminalReport(unsafe),
+      formatJsonReport(unsafe),
+      formatMarkdownReport(unsafe),
+      formatSarifReport(unsafe),
+      formatGitHubReport(unsafe)
+    ];
+
+    expect(outputs.every((output) => !output.includes('reporter-secret'))).toBe(true);
+    expect(JSON.stringify(unsafe)).toBe(before);
+    expect(formatJsonReport(unsafe, { maskSecrets: false })).toContain('reporter-secret');
+  });
+
+  it('adds terminal color only when explicitly requested', () => {
+    expect(formatTerminalReport(result)).not.toContain(String.fromCharCode(27));
+    expect(formatTerminalReport(result, { color: true })).toContain(String.fromCharCode(27));
   });
 });
