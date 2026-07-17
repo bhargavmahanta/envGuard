@@ -18,9 +18,9 @@ function normalizeIgnorePattern(pattern: string): string {
   return normalized;
 }
 
-async function loadEnvGuardIgnore(root: string): Promise<string[]> {
+async function loadEnvGuardIgnore(root: string, ignorePath?: string): Promise<string[]> {
   try {
-    const raw = await fs.readFile(path.join(root, '.envguardignore'), 'utf8');
+    const raw = await fs.readFile(ignorePath ?? path.join(root, '.envguardignore'), 'utf8');
     return raw
       .split(/\r?\n/)
       .map((line) => line.trim())
@@ -55,7 +55,8 @@ export async function resolveScanRoot(targetPath: string, cwd: string): Promise<
 export async function discoverFiles(
   targetPath: string,
   cwd: string,
-  config: EnvGuardConfig
+  config: EnvGuardConfig,
+  ignorePath?: string
 ): Promise<{ root: string; files: string[] }> {
   const absoluteTarget = path.resolve(cwd, targetPath);
   const stat = await fs.stat(absoluteTarget);
@@ -68,7 +69,7 @@ export async function discoverFiles(
     };
   }
 
-  const envguardIgnore = await loadEnvGuardIgnore(root);
+  const envguardIgnore = await loadEnvGuardIgnore(root, ignorePath);
   const gitIgnore = config.scan.include_gitignored ? [] : await loadGitIgnore(root);
   const ignore = [
     ...DEFAULT_EXCLUDE_PATTERNS,

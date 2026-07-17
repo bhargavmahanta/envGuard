@@ -2,10 +2,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import picomatch from 'picomatch';
 import { applyBaseline, defaultBaselinePath, findingFingerprint, loadBaseline } from './baseline.js';
-import { DEFAULT_CONFIG, DEFAULT_EXCLUDE_PATTERNS, REPORT_SCHEMA_VERSION, VERSION } from './defaults.js';
-import { loadConfig } from './config.js';
+import { DEFAULT_EXCLUDE_PATTERNS, REPORT_SCHEMA_VERSION, VERSION } from './defaults.js';
+import { loadConfig, mergeConfig } from './config.js';
+import { assertScanOptions, normalizeScanInvocation } from './core/options.js';
 import { dedupeFindings } from './dedupe.js';
 import { detectFindings } from './detector.js';
+import { ScanAbortedError } from './errors.js';
 import { maskSensitivePreview } from './masking.js';
 import { parseScannedFile } from './parser.js';
 import { calculateRiskScore } from './riskScore.js';
@@ -245,29 +247,52 @@ async function resolveTargetFiles(
   };
 }
 
-export async function scan(targetPath: string, options: ScanOptions = {}): Promise<ScanResult> {
-  const cwd = options.cwd ?? process.cwd();
-  const loaded = await loadConfig(cwd);
-  const config = loaded.config ?? DEFAULT_CONFIG;
+export async function scan(targetPath?: string, options?: ScanOptions): Promise<ScanResult>;
+export async function scan(options?: ScanOptions): Promise<ScanResult>;
+export async function scan(
+  targetOrOptions: string | ScanOptions = {},
+  legacyOptions: ScanOptions = {}
+): Promise<ScanResult> {
+  const options = normalizeScanInvocation(targetOrOptions, legacyOptions);
+  const targetPath = options.target ?? '.';
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const startedAt = new Date();
+  const loaded = await loadConfig({ cwd, configPath: options.configPath, config: options.config });
+  const config = mergeConfig(loaded.config, {
+    severity: options.failOn ? { fail_on: options.failOn } : undefined,
+    entropy: options.entropy,
+    output: options.maskSecrets === undefined ? undefined : { mask: options.maskSecrets },
+    include: options.include,
+    exclude: options.exclude
+  });
+  const failOn = options.failOn ?? config.severity.fail_on;
+  assertScanOptions(options, failOn);
+
+  const ignorePath = options.ignorePath ? path.resolve(cwd, options.ignorePath) : undefined;
   const { root, files } = options.targetFiles
     ? await resolveTargetFiles(targetPath, cwd, config, options.targetFiles)
-    : await discoverFiles(targetPath, cwd, config);
+    : await discoverFiles(targetPath, cwd, config, ignorePath);
   const disabledRules = new Set(config.rules.disabled);
 
   const findings: Finding[] = [];
   const scannedFiles: ScannedFile[] = [];
   let skippedFiles = 0;
-  const startedAt = Date.now();
-  const timeoutMs = config.scan.timeout_seconds > 0 ? config.scan.timeout_seconds * 1000 : 0;
+  const startedAtMs = startedAt.getTime();
+  const timeoutMs = options.timeoutMs ?? (config.scan.timeout_seconds > 0 ? config.scan.timeout_seconds * 1000 : 0);
+  const maximumFileSizeBytes = options.maximumFileSizeBytes ?? config.scan.max_file_mb * 1024 * 1024;
 
   for (const filePath of files) {
-    if (timeoutMs > 0 && Date.now() - startedAt > timeoutMs) {
+    if (options.signal?.aborted) {
+      throw new ScanAbortedError();
+    }
+
+    if (timeoutMs > 0 && Date.now() - startedAtMs > timeoutMs) {
       skippedFiles += 1;
       continue;
     }
 
     const stat = await fs.stat(filePath);
-    if (stat.size > config.scan.max_file_mb * 1024 * 1024) {
+    if (stat.size > maximumFileSizeBytes) {
       skippedFiles += 1;
       continue;
     }
@@ -297,8 +322,16 @@ export async function scan(targetPath: string, options: ScanOptions = {}): Promi
       id: `ENV-${String(index + 1).padStart(3, '0')}`
     }));
 
-  const allowedFindings = sortedFindings.filter((finding) => !isAllowed(finding, config));
-  const baselinePath = options.baselinePath ?? defaultBaselinePath(cwd);
+  const allowedFindings = sortedFindings
+    .filter((finding) => !isAllowed(finding, config))
+    .filter(
+      (finding) =>
+        !options.minimumSeverity ||
+        SEVERITY_RANK[finding.severity] >= SEVERITY_RANK[options.minimumSeverity]
+    );
+  const baselinePath = options.baselinePath
+    ? path.resolve(cwd, options.baselinePath)
+    : defaultBaselinePath(cwd);
   const baselineFingerprints =
     options.useBaseline === false ? new Set<string>() : await loadBaseline(baselinePath);
   const visibleFindings = applyBaseline(allowedFindings, baselineFingerprints).map(
@@ -308,15 +341,29 @@ export async function scan(targetPath: string, options: ScanOptions = {}): Promi
     })
   );
 
+  const completedAt = new Date();
+  const summary = summarize(visibleFindings, files.length - skippedFiles, skippedFiles);
+  const passed = !shouldFail({ findings: visibleFindings } as ScanResult, failOn);
+
   return {
     tool: 'envguard',
     version: VERSION,
     schemaVersion: REPORT_SCHEMA_VERSION,
     targetPath,
-    generatedAt: new Date().toISOString(),
+    generatedAt: completedAt.toISOString(),
     configPath: loaded.configPath,
-    summary: summarize(visibleFindings, files.length - skippedFiles, skippedFiles),
-    findings: visibleFindings
+    metadata: {
+      startedAt: startedAt.toISOString(),
+      completedAt: completedAt.toISOString(),
+      durationMs: completedAt.getTime() - startedAtMs,
+      filesDiscovered: files.length,
+      filesScanned: summary.filesScanned,
+      filesSkipped: summary.skippedFiles
+    },
+    summary,
+    findings: visibleFindings,
+    passed,
+    recommendedExitCode: passed ? 0 : 1
   };
 }
 
