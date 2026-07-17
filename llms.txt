@@ -1,0 +1,13 @@
+# EnvGuard
+
+Security linting for env, Docker, CI, and runtime configuration.
+
+- README: https://github.com/bhargavmahanta/envGuard/blob/main/README.md
+- SDK: https://github.com/bhargavmahanta/envGuard/blob/main/docs/sdk.md
+- Agent integration: https://github.com/bhargavmahanta/envGuard/blob/main/docs/agent-integration.md
+- Public API: https://github.com/bhargavmahanta/envGuard/blob/main/docs/public-api.md
+- Rules: https://github.com/bhargavmahanta/envGuard/blob/main/docs/rules.md
+- Reporting: https://github.com/bhargavmahanta/envGuard/blob/main/docs/reporting.md
+- Configuration examples: https://github.com/bhargavmahanta/envGuard/blob/main/docs/examples.md
+
+Use `envguard scan . --agent` for deterministic masked JSON. EnvGuard does not validate credentials or make network requests while scanning.

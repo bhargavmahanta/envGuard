@@ -4,6 +4,20 @@ All notable changes to EnvGuard are documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style sections and uses semantic versioning.
 
+## Unreleased
+
+### Added
+
+- Added supported ESM, CommonJS, and TypeScript SDK entry points.
+- Added reusable scanners, structured errors, recoverable scan diagnostics, and pure reporter exports.
+- Added deterministic `scan --agent` output and stable CLI exit codes.
+- Added packed-package consumer tests for imports, declarations, reporters, and command shims.
+
+### Security
+
+- Added scan-root containment, symbolic-link escape prevention, and safer handling for malformed, missing, oversized, and unsupported files.
+- Agent mode forces masking and non-interactive JSON output.
+
 ## 1.1.0
 
 ### Added

@@ -42,9 +42,18 @@
 - Env hygiene, schema drift, GitLab CI, CircleCI, and expanded Docker/Compose checks
 - Config allowlists, custom declarative rules, scan limits, pre-commit hook, and Docker image recipe
 
+## v1.2.0
+
+- Supported ESM, CommonJS, and TypeScript SDK
+- Reusable scanner instances and structured errors
+- Pure reporter subpath exports
+- Deterministic agent mode and stable exit codes
+- Packed-package consumer tests and monorepo integration guidance
+- Internal boundary prepared for a future MCP package
+
 ## Later
 
 - VS Code extension
 - Framework presets
-- Monorepo support
+- MCP server built on the stable public SDK
 - Optional secret validation disabled by default
