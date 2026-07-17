@@ -67,9 +67,26 @@ export interface EnvGuardConfig {
   exclude: string[];
 }
 
+export interface PartialEnvGuardConfig {
+  severity?: Partial<EnvGuardConfig['severity']>;
+  entropy?: Partial<EnvGuardConfig['entropy']>;
+  output?: Partial<EnvGuardConfig['output']>;
+  rules?: Partial<EnvGuardConfig['rules']>;
+  allow?: AllowConfig[];
+  scan?: Partial<EnvGuardConfig['scan']>;
+  include?: string[];
+  exclude?: string[];
+}
+
 export interface LoadedConfig {
   config: EnvGuardConfig;
   configPath?: string;
+}
+
+export interface LoadConfigOptions {
+  cwd?: string;
+  configPath?: string;
+  config?: PartialEnvGuardConfig;
 }
 
 export interface RuleMeta {
@@ -114,13 +131,42 @@ export interface ScannedFile {
   lines: string[];
   env: EnvEntry[];
   yaml?: unknown;
+  errors?: ScanError[];
 }
 
 export interface ScanOptions {
+  target?: string;
   cwd?: string;
+  config?: PartialEnvGuardConfig;
+  configPath?: string;
+  ignorePath?: string;
   baselinePath?: string;
   useBaseline?: boolean;
   targetFiles?: string[];
+  include?: string[];
+  exclude?: string[];
+  minimumSeverity?: Severity;
+  failOn?: Severity;
+  maskSecrets?: boolean;
+  entropy?: {
+    enabled?: boolean;
+    threshold?: number;
+  };
+  maximumFileSizeBytes?: number;
+  timeoutMs?: number;
+  followSymbolicLinks?: boolean;
+  signal?: AbortSignal;
+}
+
+export interface Scanner {
+  scan(target?: string, overrides?: ScanOptions): Promise<ScanResult>;
+}
+
+export interface ScanError {
+  code: string;
+  message: string;
+  filePath?: string;
+  recoverable: boolean;
 }
 
 export interface ScanSummary {
@@ -138,8 +184,19 @@ export interface ScanResult {
   targetPath: string;
   generatedAt: string;
   configPath?: string;
+  metadata?: {
+    startedAt: string;
+    completedAt: string;
+    durationMs: number;
+    filesDiscovered: number;
+    filesScanned: number;
+    filesSkipped: number;
+  };
   summary: ScanSummary;
   findings: Finding[];
+  passed?: boolean;
+  recommendedExitCode?: number;
+  errors?: ScanError[];
 }
 
 export interface BaselineFile {

@@ -3,7 +3,13 @@ import path from 'node:path';
 import yaml from 'js-yaml';
 import { z } from 'zod';
 import { CONFIG_FILENAMES, DEFAULT_CONFIG } from './defaults.js';
-import type { EnvGuardConfig, LoadedConfig } from './types.js';
+import { ConfigError } from './errors.js';
+import type {
+  EnvGuardConfig,
+  LoadedConfig,
+  LoadConfigOptions,
+  PartialEnvGuardConfig
+} from './types.js';
 
 const SeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
 const ConfidenceSchema = z.enum(['low', 'medium', 'high']);
@@ -76,67 +82,107 @@ async function fileExists(filePath: string): Promise<boolean> {
 }
 
 async function readConfigFile(filePath: string): Promise<unknown> {
-  const raw = await fs.readFile(filePath, 'utf8');
-  if (filePath.endsWith('.json')) {
-    return JSON.parse(raw) as unknown;
-  }
+  try {
+    const raw = await fs.readFile(filePath, 'utf8');
+    if (filePath.endsWith('.json')) {
+      return JSON.parse(raw) as unknown;
+    }
 
-  return yaml.load(raw);
+    return yaml.load(raw);
+  } catch (error) {
+    throw new ConfigError(`Failed to read EnvGuard config at ${filePath}.`, 'CONFIG_READ_FAILED', error);
+  }
 }
 
-export async function loadConfig(cwd: string): Promise<LoadedConfig> {
-  for (const filename of CONFIG_FILENAMES) {
-    const candidate = path.join(cwd, filename);
-    if (!(await fileExists(candidate))) {
-      continue;
-    }
-
-    const parsed = ConfigSchema.safeParse(await readConfigFile(candidate));
-    if (!parsed.success) {
-      const details = parsed.error.issues
-        .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
-        .join('; ');
-      throw new Error(`Invalid EnvGuard config at ${candidate}: ${details}`);
-    }
-
-    return {
-      config: mergeConfig(parsed.data),
-      configPath: candidate
-    };
+function validateConfig(value: unknown, filePath?: string): PartialEnvGuardConfig {
+  const parsed = ConfigSchema.safeParse(value ?? {});
+  if (!parsed.success) {
+    const details = parsed.error.issues
+      .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
+      .join('; ');
+    const location = filePath ? ` at ${filePath}` : '';
+    throw new ConfigError(`Invalid EnvGuard config${location}: ${details}`);
   }
 
+  return parsed.data;
+}
+
+function cloneRules(config: EnvGuardConfig['rules']): EnvGuardConfig['rules'] {
   return {
-    config: structuredClone(DEFAULT_CONFIG)
+    disabled: [...config.disabled],
+    packs: [...config.packs],
+    custom: config.custom.map((rule) => ({ ...rule, file_globs: [...rule.file_globs] }))
   };
 }
 
-export function mergeConfig(overrides: z.infer<typeof ConfigSchema>): EnvGuardConfig {
+export function mergeConfig(...overrides: PartialEnvGuardConfig[]): EnvGuardConfig {
+  let result: EnvGuardConfig = {
+    severity: { ...DEFAULT_CONFIG.severity },
+    entropy: { ...DEFAULT_CONFIG.entropy },
+    output: { ...DEFAULT_CONFIG.output },
+    rules: cloneRules(DEFAULT_CONFIG.rules),
+    allow: DEFAULT_CONFIG.allow.map((entry) => ({ ...entry })),
+    scan: { ...DEFAULT_CONFIG.scan },
+    include: [...DEFAULT_CONFIG.include],
+    exclude: [...DEFAULT_CONFIG.exclude]
+  };
+
+  for (const override of overrides) {
+    result = {
+      severity: { ...result.severity, ...override.severity },
+      entropy: { ...result.entropy, ...override.entropy },
+      output: { ...result.output, ...override.output },
+      rules: {
+        ...result.rules,
+        ...override.rules,
+        disabled: [...(override.rules?.disabled ?? result.rules.disabled)],
+        packs: [...(override.rules?.packs ?? result.rules.packs)],
+        custom: (override.rules?.custom ?? result.rules.custom).map((rule) => ({
+          ...rule,
+          file_globs: [...rule.file_globs]
+        }))
+      },
+      allow: (override.allow ?? result.allow).map((entry) => ({ ...entry })),
+      scan: { ...result.scan, ...override.scan },
+      include: [...(override.include ?? result.include)],
+      exclude: [...(override.exclude ?? result.exclude)]
+    };
+  }
+
+  return result;
+}
+
+export async function loadConfig(cwd: string): Promise<LoadedConfig>;
+export async function loadConfig(options?: LoadConfigOptions): Promise<LoadedConfig>;
+export async function loadConfig(cwdOrOptions: string | LoadConfigOptions = {}): Promise<LoadedConfig> {
+  const options = typeof cwdOrOptions === 'string' ? { cwd: cwdOrOptions } : cwdOrOptions;
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  let configPath: string | undefined;
+  let fileConfig: PartialEnvGuardConfig = {};
+
+  if (options.configPath) {
+    const explicitPath = path.resolve(cwd, options.configPath);
+    if (!(await fileExists(explicitPath))) {
+      throw new ConfigError(`EnvGuard config not found at ${explicitPath}.`, 'CONFIG_NOT_FOUND');
+    }
+    configPath = explicitPath;
+    fileConfig = validateConfig(await readConfigFile(explicitPath), explicitPath);
+  } else {
+    for (const filename of CONFIG_FILENAMES) {
+      const candidate = path.join(cwd, filename);
+      if (!(await fileExists(candidate))) {
+        continue;
+      }
+
+      configPath = candidate;
+      fileConfig = validateConfig(await readConfigFile(candidate), candidate);
+      break;
+    }
+  }
+
+  const programmaticConfig = validateConfig(options.config ?? {});
   return {
-    severity: {
-      ...DEFAULT_CONFIG.severity,
-      ...overrides.severity
-    },
-    entropy: {
-      ...DEFAULT_CONFIG.entropy,
-      ...overrides.entropy
-    },
-    output: {
-      ...DEFAULT_CONFIG.output,
-      ...overrides.output
-    },
-    rules: {
-      ...DEFAULT_CONFIG.rules,
-      ...overrides.rules,
-      disabled: overrides.rules?.disabled ?? DEFAULT_CONFIG.rules.disabled,
-      packs: overrides.rules?.packs ?? DEFAULT_CONFIG.rules.packs,
-      custom: overrides.rules?.custom ?? DEFAULT_CONFIG.rules.custom
-    },
-    allow: overrides.allow ?? DEFAULT_CONFIG.allow,
-    scan: {
-      ...DEFAULT_CONFIG.scan,
-      ...overrides.scan
-    },
-    include: overrides.include ?? DEFAULT_CONFIG.include,
-    exclude: overrides.exclude ?? DEFAULT_CONFIG.exclude
+    config: mergeConfig(fileConfig, programmaticConfig),
+    configPath
   };
 }

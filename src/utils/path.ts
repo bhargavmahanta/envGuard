@@ -8,6 +8,14 @@ export function relativeNormalized(root: string, absolutePath: string): string {
   return normalizePath(path.relative(root, absolutePath));
 }
 
+export function isPathInside(root: string, candidate: string): boolean {
+  const relative = path.relative(path.resolve(root), path.resolve(candidate));
+  return (
+    relative === '' ||
+    (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative))
+  );
+}
+
 export function isExampleTemplatePath(filePath: string): boolean {
   const normalized = normalizePath(filePath).toLowerCase();
   return (

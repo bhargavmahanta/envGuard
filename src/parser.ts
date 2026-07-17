@@ -1,6 +1,6 @@
 import path from 'node:path';
 import yaml from 'js-yaml';
-import type { EnvEntry, FileKind, ScannedFile } from './types.js';
+import type { EnvEntry, FileKind, ScanError, ScannedFile } from './types.js';
 import {
   isCircleCiPath,
   isDockerfilePath,
@@ -80,12 +80,19 @@ export function parseScannedFile(root: string, absolutePath: string, content: st
   const relativePath = relativeNormalized(root, absolutePath);
   const kind = detectFileKind(relativePath);
   let parsedYaml: unknown;
+  const errors: ScanError[] = [];
 
   if (kind === 'yaml' || kind === 'github-actions' || kind === 'gitlab-ci' || kind === 'circleci') {
     try {
       parsedYaml = yaml.load(content);
     } catch {
       parsedYaml = undefined;
+      errors.push({
+        code: 'MALFORMED_YAML',
+        message: `Could not parse YAML in ${relativePath}.`,
+        filePath: relativePath,
+        recoverable: true
+      });
     }
   }
 
@@ -96,6 +103,7 @@ export function parseScannedFile(root: string, absolutePath: string, content: st
     content,
     lines: content.split(/\r?\n/),
     env: parseEnvContent(content),
-    yaml: parsedYaml
+    yaml: parsedYaml,
+    errors: errors.length > 0 ? errors : undefined
   };
 }

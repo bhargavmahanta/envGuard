@@ -1,6 +1,14 @@
 # Design Notes
 
-EnvGuard follows a small rule-engine pipeline:
+EnvGuard follows a layered dependency direction:
+
+```text
+CLI -> Public SDK -> Scanner engine -> walkers, parsers, detectors, rules, masking, scoring
+```
+
+The SDK and scanner engine do not depend on Commander, Chalk, Ora, terminal output, argument parsing, or process termination. Reporter functions are pure and available through a separate package subpath.
+
+The scan pipeline is:
 
 1. Load default config.
 2. Load `envguard.config.yml` if present.
@@ -12,8 +20,8 @@ EnvGuard follows a small rule-engine pipeline:
 8. Mask previews by default.
 9. Deduplicate findings.
 10. Calculate severity, confidence, and risk score.
-11. Render terminal, JSON, or Markdown reports.
-12. Exit non-zero in CI mode when the configured threshold is met.
+11. Return structured metadata, findings, recoverable errors, and a policy recommendation.
+12. Let the CLI or caller render output and decide how to apply the recommendation.
 
 ## Public CLI Contract
 
@@ -24,8 +32,10 @@ Exit codes:
 | Code | Meaning |
 | --- | --- |
 | `0` | Scan completed and the configured CI threshold was not met. |
-| `1` | Findings met the CI threshold, or an unexpected scan/runtime error occurred. |
+| `1` | Findings met the configured failure threshold. |
 | `2` | CLI input or EnvGuard configuration is invalid. |
+| `3` | Target, filesystem, or scan-abort failure. |
+| `4` | Unexpected internal failure. |
 
 Automation flags:
 
@@ -38,6 +48,7 @@ Automation flags:
 | `--no-color` | Disables colored terminal output. |
 | `--staged` | Scans staged git files only. |
 | `--changed [base-ref]` | Scans changed git files only. |
+| `--agent` | Emits deterministic masked JSON for agents and automation. |
 
 ## Report Schema
 
@@ -117,6 +128,8 @@ Config-level allowlists can suppress known findings by `ruleId`, `path`, `key`, 
 | `dedupe.ts` | Duplicate finding removal |
 | `reporter.ts` | Terminal, JSON, Markdown, SARIF, and GitHub annotation output |
 | `scanner.ts` | End-to-end scan orchestration |
+
+Public SDK entry points live in `index.ts`; reporter entry points live under `reporters/`; CLI-only behavior lives under `cli/`.
 
 ## Non-Goals for v1
 

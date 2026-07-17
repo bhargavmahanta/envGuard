@@ -46,3 +46,17 @@ npx @bhargavmahanta/envguard scan . --format github
 ```
 
 All report formats mask sensitive values by default.
+
+## SDK Reporters
+
+Pure reporter functions are available from the supported subpath:
+
+```ts
+import {
+  formatJsonReport,
+  formatMarkdownReport,
+  formatSarifReport
+} from '@bhargavmahanta/envguard/reporters';
+```
+
+They return strings, do not print or write files, clone the supplied result, and mask by default. Passing `{ maskSecrets: false }` is an explicit unsafe opt-out.

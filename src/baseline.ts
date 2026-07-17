@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { DEFAULT_BASELINE_FILENAME, REPORT_SCHEMA_VERSION } from './defaults.js';
+import { ConfigError } from './errors.js';
 import type { BaselineFile, Finding } from './types.js';
 
 export function findingFingerprint(finding: Pick<Finding, 'ruleId' | 'filePath' | 'line' | 'title'>): string {
@@ -37,7 +38,7 @@ export async function loadBaselineFile(filePath: string): Promise<BaselineFile |
       return undefined;
     }
 
-    throw new Error(`Failed to read baseline file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
+    throw new ConfigError(`Failed to read EnvGuard baseline at ${filePath}.`, 'BASELINE_READ_FAILED', error);
   }
 }
 

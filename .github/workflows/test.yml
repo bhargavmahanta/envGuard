@@ -37,5 +37,8 @@ jobs:
       - name: Run sample scan
         run: node dist/cli.js scan examples/vulnerable-project --format json --output sample-report.json
 
+      - name: Test packed package consumers
+        run: npm run test:consumers
+
       - name: Check npm package contents
         run: npm pack --dry-run
