@@ -17,6 +17,19 @@ export const EXIT_CODES = {
 
 export type ExitCode = (typeof EXIT_CODES)[keyof typeof EXIT_CODES];
 
+const FILESYSTEM_ERROR_CODES = new Set([
+  'EACCES',
+  'EBUSY',
+  'EISDIR',
+  'EMFILE',
+  'ENFILE',
+  'ENOENT',
+  'ENOSPC',
+  'ENOTDIR',
+  'EPERM',
+  'EROFS'
+]);
+
 export function exitCodeForError(error: unknown): ExitCode {
   if (
     error instanceof InvalidArgumentError ||
@@ -30,6 +43,13 @@ export function exitCodeForError(error: unknown): ExitCode {
     error instanceof TargetAccessError ||
     error instanceof ScanAbortedError
   ) {
+    return EXIT_CODES.operational;
+  }
+  const systemCode =
+    error && typeof error === 'object' && 'code' in error && typeof error.code === 'string'
+      ? error.code
+      : undefined;
+  if (systemCode && FILESYSTEM_ERROR_CODES.has(systemCode)) {
     return EXIT_CODES.operational;
   }
   if (error instanceof CommanderError) {
