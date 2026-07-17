@@ -1,6 +1,6 @@
 {
   "name": "@bhargavmahanta/envguard",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Security linting for env, Docker, CI, and runtime configuration.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -24,7 +24,7 @@
     "url": "https://github.com/bhargavmahanta/envGuard/issues"
   },
   "bin": {
-    "envguard": "./dist/cli.js"
+    "envguard": "dist/cli.js"
   },
   "exports": {
     ".": {

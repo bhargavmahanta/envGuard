@@ -4,7 +4,7 @@ All notable changes to EnvGuard are documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style sections and uses semantic versioning.
 
-## Unreleased
+## 1.2.0 - 2026-07-17
 
 ### Added
 
