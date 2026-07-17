@@ -9,3 +9,4 @@ coverage/
 *.log
 sample-report.json
 sample-report.md
+benchmarks/results.json

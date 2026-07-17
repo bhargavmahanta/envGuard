@@ -62,6 +62,20 @@ describe('CLI compatibility', () => {
     expect(help.stdout).toContain('baseline');
     expect(help.stdout).toContain('rules');
     expect(help.stdout).toContain('doctor');
+    expect(help.stdout).toContain('explain');
+  });
+
+  it('explains known rules and rejects unknown rule IDs', async () => {
+    const explained = await runCli(['explain', 'k8s-privileged', '--json'], tmpDir);
+    const missing = await runCli(['explain', 'missing-rule'], tmpDir);
+
+    expect(explained.exitCode).toBe(0);
+    expect(JSON.parse(explained.stdout)).toMatchObject({
+      id: 'k8s-privileged',
+      category: 'kubernetes',
+      severity: 'high'
+    });
+    expect(missing.exitCode).toBe(2);
   });
 
   it('keeps JSON report fields and default masking compatible', async () => {

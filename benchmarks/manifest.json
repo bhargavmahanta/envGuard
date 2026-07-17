@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "name": "kubernetes-safe",
+      "path": "benchmarks/fixtures/kubernetes-safe",
+      "requiredRuleIds": [],
+      "forbiddenRuleIds": ["k8s-privileged", "k8s-host-network", "k8s-host-path", "k8s-run-as-root", "k8s-dangerous-capability", "k8s-unpinned-image", "k8s-literal-secret"],
+      "maximumDurationMs": 5000
+    },
+    {
+      "name": "kubernetes-vulnerable",
+      "path": "benchmarks/fixtures/kubernetes-vulnerable",
+      "requiredRuleIds": ["k8s-privileged", "k8s-host-network", "k8s-host-path", "k8s-run-as-root", "k8s-dangerous-capability", "k8s-unpinned-image", "k8s-literal-secret"],
+      "forbiddenRuleIds": [],
+      "maximumDurationMs": 5000
+    }
+  ],
+  "publicRepositories": [
+    {"name": "express", "url": "https://github.com/expressjs/express.git", "commit": "ae6dd37680e3a00618d6c8a3e522f0ee4eeba1a4", "maximumFindings": 0},
+    {"name": "flask", "url": "https://github.com/pallets/flask.git", "commit": "36e4a824f340fdee7ed50937ba8e7f6bc7d17f81", "maximumFindings": 0},
+    {"name": "awesome-compose", "url": "https://github.com/docker/awesome-compose.git", "commit": "30f4b7f6a6c3b0c0ecf4d4efb0de203c48d11562", "maximumFindings": 256},
+    {"name": "kubernetes-examples", "url": "https://github.com/kubernetes/examples.git", "commit": "d6b8cd27eacb51e651a1aa6f7c190a28713eff6e", "maximumFindings": 197}
+  ]
+}

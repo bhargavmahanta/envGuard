@@ -755,6 +755,103 @@ function detectUnsafeSchemaDefaults(file: ScannedFile, context: DetectionContext
   }
 }
 
+type YamlObject = Record<string, unknown>;
+
+function yamlObjects(value: unknown): YamlObject[] {
+  if (Array.isArray(value)) {
+    return value.flatMap(yamlObjects);
+  }
+  return value && typeof value === 'object' ? [value as YamlObject] : [];
+}
+
+function walkYaml(
+  value: unknown,
+  visit: (key: string, child: unknown, path: string[], parent: YamlObject) => void,
+  currentPath: string[] = []
+): void {
+  if (Array.isArray(value)) {
+    value.forEach((child, index) => walkYaml(child, visit, [...currentPath, String(index)]));
+    return;
+  }
+  if (!value || typeof value !== 'object') return;
+
+  for (const [key, child] of Object.entries(value as YamlObject)) {
+    const childPath = [...currentPath, key];
+    visit(key, child, childPath, value as YamlObject);
+    walkYaml(child, visit, childPath);
+  }
+}
+
+function yamlLine(file: ScannedFile, key: string, value?: unknown): number {
+  const rendered = typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+    ? String(value)
+    : undefined;
+  const keyPattern = new RegExp(`^\\s*(?:-\\s*)?${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*:`);
+  const index = file.lines.findIndex((line) => keyPattern.test(line) && (!rendered || line.includes(rendered)));
+  return index >= 0 ? index + 1 : 1;
+}
+
+function imageIsFloating(image: string): boolean {
+  if (image.includes('@sha256:')) return false;
+  const lastSegment = image.split('/').at(-1) ?? image;
+  return !lastSegment.includes(':') || lastSegment.endsWith(':latest');
+}
+
+function detectKubernetes(file: ScannedFile, context: DetectionContext, findings: Finding[]): void {
+  if (file.kind !== 'kubernetes' && file.kind !== 'helm-values') return;
+
+  const dangerousCapabilities = new Set(['ALL', 'SYS_ADMIN', 'NET_ADMIN', 'SYS_PTRACE', 'DAC_READ_SEARCH']);
+  const documents = yamlObjects(file.yaml);
+
+  for (const document of documents) {
+    const isSecretDocument = document.kind === 'Secret';
+    walkYaml(document, (key, value, keyPath, parent) => {
+      const line = yamlLine(file, key, value);
+      const preview = linePreview(file, line, `${key}: ${String(value)}`);
+
+      if (key === 'privileged' && value === true) {
+        pushFinding(findings, makeFinding(file, context, 'k8s-privileged', line, preview));
+      }
+      if (key === 'hostNetwork' && value === true) {
+        pushFinding(findings, makeFinding(file, context, 'k8s-host-network', line, preview));
+      }
+      if (key === 'hostPath' && value && typeof value === 'object') {
+        pushFinding(findings, makeFinding(file, context, 'k8s-host-path', line, preview));
+      }
+      if ((key === 'runAsUser' && value === 0) || (key === 'runAsNonRoot' && value === false)) {
+        pushFinding(findings, makeFinding(file, context, 'k8s-run-as-root', line, preview));
+      }
+      if (key === 'add' && keyPath.includes('capabilities') && Array.isArray(value)) {
+        for (const capability of value.filter((entry): entry is string => typeof entry === 'string')) {
+          if (dangerousCapabilities.has(capability.toUpperCase())) {
+            pushFinding(findings, makeFinding(file, context, 'k8s-dangerous-capability', line, preview));
+          }
+        }
+      }
+      if (key === 'image' && typeof value === 'string' && imageIsFloating(value)) {
+        pushFinding(findings, makeFinding(file, context, 'k8s-unpinned-image', line, preview));
+      }
+      if (file.kind === 'helm-values' && key === 'image' && value && typeof value === 'object' && !Array.isArray(value)) {
+        const image = value as YamlObject;
+        if (typeof image.repository === 'string' &&
+            typeof image.digest !== 'string' &&
+            (typeof image.tag !== 'string' || image.tag === 'latest')) {
+          pushFinding(findings, makeFinding(file, context, 'k8s-unpinned-image', line, preview));
+        }
+      }
+
+      const parentKey = keyPath.at(-2);
+      const secretContext =
+        (isSecretDocument && (parentKey === 'data' || parentKey === 'stringData')) ||
+        (file.kind === 'helm-values' && isSuspiciousKey(key)) ||
+        (key === 'value' && keyPath.includes('env') && typeof parent.name === 'string' && isSuspiciousKey(parent.name));
+      if (secretContext && typeof value === 'string' && value.length > 0 && !valueLooksFake(value)) {
+        pushFinding(findings, makeFinding(file, context, 'k8s-literal-secret', line, preview, value, { key }));
+      }
+    });
+  }
+}
+
 function detectCustomRules(file: ScannedFile, context: DetectionContext, findings: Finding[]): void {
   for (const rule of context.customRules) {
     if (!picomatch.isMatch(file.relativePath, rule.file_globs)) {
@@ -807,6 +904,7 @@ export function detectFindings(file: ScannedFile, context: DetectionContext): Fi
   detectGithubActions(file, context, findings);
   detectGitlabCi(file, context, findings);
   detectCircleCi(file, context, findings);
+  detectKubernetes(file, context, findings);
   detectCustomRules(file, context, findings);
   detectEntropy(file, context, findings);
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.0] - Unreleased
+
+### Added
+
+- Added Kubernetes and Helm rules, multi-document YAML support, and rule explanations.
+
 ## [1.4.0] - Unreleased
 
 ### Added

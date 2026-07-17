@@ -2,6 +2,7 @@ import { Command, CommanderError } from 'commander';
 import { VERSION } from '../defaults.js';
 import { registerBaselineCommand } from './commands/baseline.js';
 import { registerDoctorCommand } from './commands/doctor.js';
+import { registerExplainCommand } from './commands/explain.js';
 import { registerInitCommand } from './commands/init.js';
 import { registerRulesCommand } from './commands/rules.js';
 import { registerScanCommand } from './commands/scan.js';
@@ -30,6 +31,7 @@ export async function runCli(argv = process.argv, io: CliIO = processIO): Promis
   registerBaselineCommand(program, context);
   registerRulesCommand(program, context);
   registerDoctorCommand(program, context);
+  registerExplainCommand(program, context);
 
   try {
     await program.parseAsync(argv);

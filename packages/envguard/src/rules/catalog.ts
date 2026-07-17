@@ -522,6 +522,69 @@ export const RULES: RuleMeta[] = [
     confidence: 'high',
     description: 'A Compose service image uses the mutable latest tag.',
     fix: 'Pin Compose images to explicit versions or digests.'
+  },
+  {
+    id: 'k8s-privileged',
+    title: 'Kubernetes container uses privileged mode',
+    category: 'kubernetes',
+    severity: 'high',
+    confidence: 'high',
+    description: 'A Kubernetes workload enables privileged container execution.',
+    fix: 'Remove privileged mode and grant only explicitly required capabilities.'
+  },
+  {
+    id: 'k8s-host-network',
+    title: 'Kubernetes workload uses host networking',
+    category: 'kubernetes',
+    severity: 'high',
+    confidence: 'high',
+    description: 'Host networking bypasses Kubernetes network isolation.',
+    fix: 'Disable hostNetwork and expose only required ports through Services.'
+  },
+  {
+    id: 'k8s-host-path',
+    title: 'Kubernetes workload mounts a host path',
+    category: 'kubernetes',
+    severity: 'high',
+    confidence: 'medium',
+    description: 'A hostPath volume exposes node filesystem content to a workload.',
+    fix: 'Use a managed volume and avoid direct node filesystem mounts.'
+  },
+  {
+    id: 'k8s-run-as-root',
+    title: 'Kubernetes workload permits root execution',
+    category: 'kubernetes',
+    severity: 'high',
+    confidence: 'high',
+    description: 'A pod or container security context explicitly permits root execution.',
+    fix: 'Set runAsNonRoot: true and use a non-zero runAsUser.'
+  },
+  {
+    id: 'k8s-dangerous-capability',
+    title: 'Kubernetes workload adds a dangerous capability',
+    category: 'kubernetes',
+    severity: 'high',
+    confidence: 'high',
+    description: 'The container adds a broad Linux capability that weakens isolation.',
+    fix: 'Drop all capabilities and add back only the minimum capability required.'
+  },
+  {
+    id: 'k8s-unpinned-image',
+    title: 'Kubernetes image uses a floating reference',
+    category: 'kubernetes',
+    severity: 'low',
+    confidence: 'high',
+    description: 'A workload image uses latest or has no explicit tag or digest.',
+    fix: 'Pin the image to an immutable digest or explicit version tag.'
+  },
+  {
+    id: 'k8s-literal-secret',
+    title: 'Kubernetes configuration contains a literal secret',
+    category: 'kubernetes',
+    severity: 'high',
+    confidence: 'medium',
+    description: 'A Kubernetes Secret, environment value, or Helm value contains secret material directly.',
+    fix: 'Use an external secret manager and reference the secret at deployment time.'
   }
 ];
 

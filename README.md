@@ -40,6 +40,8 @@ envguard scan . --agent
 - Check `.env` hygiene and `.env.example` / `.env.schema` drift
 - Detect real-looking secrets, weak secrets, unsafe runtime settings, and wildcard CORS
 - Detect Docker and CI/CD security issues
+- Detect conservative Kubernetes and Helm configuration risks
+- Detect conservative Kubernetes and Helm configuration risks
 - Mask secrets by default in terminal, JSON, Markdown, SARIF, and GitHub annotation reports
 - Support local CLI usage, pre-commit hooks, and GitHub Actions
 - Scan only staged or changed files for fast developer workflows
@@ -103,6 +105,8 @@ envguard baseline audit
 envguard init
 envguard rules
 envguard doctor --json
+envguard explain k8s-privileged
+envguard explain k8s-privileged
 envguard scan . --agent
 ```
 
@@ -222,6 +226,8 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [SDK guide](https://github.com/bhargavmahanta/envGuard/blob/main/docs/sdk.md)
 - [Presets](https://github.com/bhargavmahanta/envGuard/blob/main/docs/presets.md)
 - [Container image](https://github.com/bhargavmahanta/envGuard/blob/main/docs/containers.md)
+- [Benchmarks](https://github.com/bhargavmahanta/envGuard/blob/main/docs/benchmarks.md)
+- [Benchmarks](https://github.com/bhargavmahanta/envGuard/blob/main/docs/benchmarks.md)
 - [Presets](https://github.com/bhargavmahanta/envGuard/blob/main/docs/presets.md)
 - [Agent integration](https://github.com/bhargavmahanta/envGuard/blob/main/docs/agent-integration.md)
 - [Future MCP architecture](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md)

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vulnerable
+spec:
+  template:
+    spec:
+      hostNetwork: true
+      securityContext:
+        runAsUser: 0
+      containers:
+        - name: app
+          image: nginx:latest
+          securityContext:
+            privileged: true
+            capabilities:
+              add: [SYS_ADMIN]
+          env:
+            - name: API_TOKEN
+              value: benchmark-literal-secret-value
+      volumes:
+        - name: host
+          hostPath:
+            path: /etc

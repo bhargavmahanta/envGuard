@@ -12,6 +12,7 @@ EnvGuard rules are grouped by practical configuration risk.
 | Docker and Compose | `docker-copy-dotenv`, `docker-copy-all`, `docker-latest-tag`, `docker-root-user`, `docker-missing-dockerignore`, `docker-add-remote-url`, `compose-privileged`, `compose-db-public-port`, `compose-inline-secret`, `compose-host-network`, `compose-unsafe-volume`, `compose-latest-tag` |
 | GitHub Actions | `actions-echo-secret`, `actions-pull-request-target`, `actions-unpinned`, `actions-hardcoded-token`, `actions-broad-permissions`, `actions-missing-permissions` |
 | GitLab CI and CircleCI | `gitlab-echo-secret`, `gitlab-unpinned-image`, `circleci-echo-secret`, `circleci-broad-context` |
+| Kubernetes and Helm | `k8s-privileged`, `k8s-host-network`, `k8s-host-path`, `k8s-run-as-root`, `k8s-dangerous-capability`, `k8s-unpinned-image`, `k8s-literal-secret` |
 
 ## Severity
 
@@ -78,6 +79,13 @@ EnvGuard rules are grouped by practical configuration risk.
 | `actions-missing-permissions` | Low | Medium | Missing explicit permissions block. Add least-privilege permissions. |
 | `env-duplicate-key` | Low | High | Duplicate env key. Keep one source of truth. |
 | `env-empty-value` | Low | High | Empty env value. Set or document intentional empties. |
+| `k8s-privileged` | High | High | Privileged Kubernetes container. Remove privileged mode. |
+| `k8s-host-network` | High | High | Workload uses host networking. Restore network isolation. |
+| `k8s-host-path` | High | Medium | Workload mounts a node host path. Use managed storage. |
+| `k8s-run-as-root` | High | High | Security context permits root. Require a non-root user. |
+| `k8s-dangerous-capability` | High | High | Container adds a broad Linux capability. Drop capabilities. |
+| `k8s-unpinned-image` | Low | High | Image uses latest or no tag/digest. Pin an immutable image. |
+| `k8s-literal-secret` | High | Medium | Manifest or values file contains literal secret material. Use external secrets. |
 | `env-invalid-key` | Low | High | Non-portable env key. Prefer uppercase keys with underscores. |
 | `env-malformed-line` | Low | Medium | Invalid dotenv assignment. Use `KEY=value`. |
 | `env-inconsistent-quotes` | Low | Medium | Mismatched quotes. Close quotes consistently. |

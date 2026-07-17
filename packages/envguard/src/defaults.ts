@@ -19,6 +19,7 @@ export const DEFAULT_INCLUDE_PATTERNS = [
   '**/config.{js,ts,json,yml,yaml}',
   '**/settings.py',
   '**/application.{yml,yaml}',
+  '**/*.{yml,yaml}',
   '**/docker-compose*.{yml,yaml}',
   '**/Dockerfile',
   '**/Dockerfile.*',

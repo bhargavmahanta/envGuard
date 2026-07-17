@@ -6,6 +6,7 @@ import {
   isDockerfilePath,
   isGithubWorkflowPath,
   isGitlabCiPath,
+  isHelmValuesPath,
   normalizePath,
   relativeNormalized
 } from './utils/path.js';
@@ -78,13 +79,24 @@ export function detectFileKind(relativePath: string): FileKind {
 
 export function parseScannedFile(root: string, absolutePath: string, content: string): ScannedFile {
   const relativePath = relativeNormalized(root, absolutePath);
-  const kind = detectFileKind(relativePath);
+  let kind = detectFileKind(relativePath);
   let parsedYaml: unknown;
   const errors: ScanError[] = [];
 
   if (kind === 'yaml' || kind === 'github-actions' || kind === 'gitlab-ci' || kind === 'circleci') {
     try {
-      parsedYaml = yaml.load(content);
+      const documents: unknown[] = [];
+      yaml.loadAll(content, (document) => documents.push(document));
+      parsedYaml = documents.length === 1 ? documents[0] : documents;
+      const candidates = documents.filter(
+        (document): document is Record<string, unknown> =>
+          Boolean(document) && typeof document === 'object' && !Array.isArray(document)
+      );
+      if (candidates.some((document) => typeof document.apiVersion === 'string' && typeof document.kind === 'string')) {
+        kind = 'kubernetes';
+      } else if (isHelmValuesPath(relativePath)) {
+        kind = 'helm-values';
+      }
     } catch {
       parsedYaml = undefined;
       errors.push({

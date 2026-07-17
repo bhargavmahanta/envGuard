@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0] - Unreleased
+
+### Added
+
+- Added structured Kubernetes and Helm detection with seven stable rule IDs.
+- Added `envguard explain <rule-id>`.
+- Added labeled release benchmarks and pinned public-repository benchmark runs.
+
+### Security
+
+- Kubernetes and Helm secret previews remain masked in every output format.
+
 ## [1.4.0] - Unreleased
 
 ### Added

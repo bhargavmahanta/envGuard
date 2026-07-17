@@ -63,3 +63,8 @@ export function isCircleCiPath(filePath: string): boolean {
   const normalized = normalizePath(filePath).toLowerCase();
   return normalized.endsWith('.circleci/config.yml') || normalized.endsWith('.circleci/config.yaml');
 }
+
+export function isHelmValuesPath(filePath: string): boolean {
+  const base = path.posix.basename(normalizePath(filePath)).toLowerCase();
+  return /^values(?:[.-][^/]*)?\.ya?ml$/.test(base);
+}

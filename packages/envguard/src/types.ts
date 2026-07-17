@@ -16,10 +16,11 @@ export type DetectionCategory =
   | 'ci'
   | 'env-hygiene'
   | 'schema'
+  | 'kubernetes'
   | 'custom'
   | 'entropy';
 
-export type FileKind = 'env' | 'yaml' | 'dockerfile' | 'github-actions' | 'gitlab-ci' | 'circleci' | 'text';
+export type FileKind = 'env' | 'yaml' | 'kubernetes' | 'helm-values' | 'dockerfile' | 'github-actions' | 'gitlab-ci' | 'circleci' | 'text';
 
 export interface CustomRuleConfig {
   id: string;
