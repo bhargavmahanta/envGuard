@@ -49,11 +49,13 @@
     "build": "tsup --config tsup.config.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:consumers": "node test/package-consumers.mjs",
+    "test:package": "npm run build && npm run test:consumers",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "security:env": "tsx src/cli.ts scan . --ci --fail-on high",
-    "release:dry": "npm run typecheck && npm run lint && npm test && npm audit && npm run build && npm pack --dry-run && npm publish --dry-run --access public"
+    "release:dry": "npm run typecheck && npm run lint && npm test && npm audit && npm run test:package && npm pack --dry-run && npm publish --dry-run --access public"
   },
   "keywords": [
     "security",

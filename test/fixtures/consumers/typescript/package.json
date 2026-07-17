@@ -1,0 +1,5 @@
+{
+  "name": "envguard-consumer-typescript",
+  "private": true,
+  "type": "module"
+}
