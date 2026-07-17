@@ -3,6 +3,7 @@
 > Security linting for env, Docker, CI, and runtime configuration.
 
 [![npm](https://img.shields.io/npm/v/@bhargavmahanta/envguard)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
+[![npm provenance](https://img.shields.io/badge/npm-provenance-verified-brightgreen)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
 [![CI](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml/badge.svg)](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
@@ -56,6 +57,9 @@ Or install globally:
 ```bash
 npm install -g @bhargavmahanta/envguard
 ```
+
+EnvGuard releases are published through npm trusted publishing with provenance. Verify the
+installed dependency signatures with `npm audit signatures`.
 
 Install as a project dependency for SDK or build-script usage:
 

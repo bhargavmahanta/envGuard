@@ -13,8 +13,12 @@ export function registerDoctorCommand(program: Command, context: CliContext): vo
     .action(async (options: { json?: boolean }) => {
       const major = Number(process.versions.node.split('.')[0]);
       const nodeOk = major >= 20;
+      const nodeMessage =
+        major === 20
+          ? `${process.version} supported for EnvGuard v1, but Node 20 is EOL; upgrade to Node 22 or 24`
+          : `${process.version}${nodeOk ? '' : ' requires >=20'}`;
       const checks: Array<{ name: string; ok: boolean; message: string }> = [
-        { name: 'node', ok: nodeOk, message: `${process.version}${nodeOk ? '' : ' requires >=20'}` }
+        { name: 'node', ok: nodeOk, message: nodeMessage }
       ];
 
       try {

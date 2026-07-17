@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1] - Unreleased
+
+### Changed
+
+- Updated GitHub Actions to Node 24-based releases and added Node 20, 22, and 24 compatibility checks.
+- Added a non-failing Node 20 end-of-life warning to `doctor`.
+- Added dependency update automation and npm provenance verification guidance.
+
 All notable changes to EnvGuard are documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style sections and uses semantic versioning.
