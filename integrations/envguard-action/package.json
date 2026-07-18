@@ -15,11 +15,11 @@
     "@bhargavmahanta/envguard": "^2.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@vercel/ncc": "^0.38.4",
-    "eslint": "^9.5.0",
-    "typescript": "^5.5.2",
-    "vitest": "^4.1.9"
+    "@types/node": "^26.1.1",
+    "@vercel/ncc": "^0.44.1",
+    "eslint": "^10.7.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=22"
