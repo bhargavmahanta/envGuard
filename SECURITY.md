@@ -1,21 +1,19 @@
 # Security Policy
 
-EnvGuard is a defensive security tool. Please do not submit real credentials in issues, pull requests, fixtures, or screenshots.
+## Supported Versions
+
+Security fixes are provided for the latest stable EnvGuard V2 release. Upgrade to the newest stable version before reporting a problem that may already be fixed.
 
 ## Reporting a Vulnerability
 
-If you find a security issue in EnvGuard, please report it privately to the maintainers. Include:
+Use GitHub's private vulnerability reporting for this repository: open the **Security** tab, choose **Advisories**, and select **Report a vulnerability**.
 
-- A concise description
-- Reproduction steps
-- Impact
-- Suggested remediation if known
+Do not open a public issue for an unpatched vulnerability. Never include live credentials, tokens, private keys, or other real secrets in a report. Use synthetic, masked examples that reproduce the behavior without validating or exposing a credential.
 
-## Handling Detected Secrets
+Include the affected EnvGuard version, operating system, Node.js version, minimal reproduction steps, expected impact, and any proposed remediation. Maintainers will coordinate disclosure and a release through the private advisory.
 
-If EnvGuard reports a real credential:
+For ordinary false positives, rule requests, and non-sensitive bugs, use the repository's public issue templates.
 
-1. Rotate or revoke the credential.
-2. Remove it from tracked files.
-3. Move future values into a protected secret store.
-4. Audit for suspicious use.
+## Handling a Suspected Exposure
+
+EnvGuard does not validate credentials. If your own incident-response process confirms that a real credential was exposed, revoke or rotate it through the issuing provider, remove it from tracked files and history as appropriate, move future values into a protected secret store, and audit for suspicious use.

@@ -24,7 +24,9 @@ function escapeProperty(value: string): string {
 
 export const githubIO: ActionIO = {
   getInput(name) {
-    return process.env[`INPUT_${name.replace(/ /g, '_').replace(/-/g, '_').toUpperCase()}`] ?? '';
+    const inputKey = `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
+    const legacyKey = inputKey.replace(/-/g, '_');
+    return process.env[inputKey] ?? process.env[legacyKey] ?? '';
   },
   async setOutput(name, value) {
     const outputFile = process.env.GITHUB_OUTPUT;
