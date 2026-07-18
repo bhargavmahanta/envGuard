@@ -68,6 +68,11 @@ npx @bhargavmahanta/envguard scan . --agent
 
 For tool-based integrations, use the root-restricted [EnvGuard MCP server](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md). See the [agent integration guide](https://github.com/bhargavmahanta/envGuard/blob/main/docs/agent-integration.md) for exit codes and safe focused scans.
 
+### Working Templates
+
+- [Node.js EnvGuard template](https://github.com/bhargavmahanta/envguard-node-example) — Node preset, safe example environment, npm script, and a passing Action workflow
+- [Next.js EnvGuard template](https://github.com/bhargavmahanta/envguard-nextjs-example) — TypeScript App Router, Next preset, and a passing Action workflow
+
 ## Features
 
 - Scan `.env`, config, Docker, Compose, and GitHub Actions files
