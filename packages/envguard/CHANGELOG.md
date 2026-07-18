@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- [#16](https://github.com/bhargavmahanta/envGuard/pull/16) [`3d3072d`](https://github.com/bhargavmahanta/envGuard/commit/3d3072d08b022c96ec0fbc04ad7b17ef6e1bf31a) Thanks [@bhargavmahanta](https://github.com/bhargavmahanta)! - Improve the published documentation and discovery metadata for CLI, GitHub Action, and agent integrations.
+
 ## 2.0.0
 
 ### Major Changes
