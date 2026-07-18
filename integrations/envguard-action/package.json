@@ -15,10 +15,12 @@
     "@bhargavmahanta/envguard": "^2.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^26.1.1",
     "@vercel/ncc": "^0.44.1",
     "eslint": "^10.7.0",
-    "typescript": "^7.0.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.64.0",
     "vitest": "^4.1.10"
   },
   "engines": {

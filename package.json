@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",
-    "@changesets/cli": "^2.29.7"
+    "@changesets/cli": "^2.29.7",
+    "typescript": "5.9.3"
   },
   "overrides": {
     "esbuild": "^0.28.1"

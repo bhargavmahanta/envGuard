@@ -8,7 +8,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "paths": {
       "@bhargavmahanta/envguard-core": ["../envguard-core/src/index.ts"],
       "@bhargavmahanta/envguard-reporters": ["../envguard-reporters/src/index.ts"]
