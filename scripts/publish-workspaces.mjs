@@ -61,18 +61,16 @@ for (const name of PUBLIC_WORKSPACES) {
   if (!workspace) throw new Error(`Public workspace not found: ${name}`);
   if (workspace.manifest.private) throw new Error(`Refusing to publish private workspace: ${name}`);
 
-  if (!dryRun) {
-    const lookup = runNpm(['view', `${name}@${workspace.manifest.version}`, 'version', '--json']);
-    if (lookup.status === 0) {
-      process.stdout.write(`already published: ${name}@${workspace.manifest.version}\n`);
-      continue;
-    }
-    const diagnostics = `${lookup.stdout ?? ''}\n${lookup.stderr ?? ''}`;
-    if (!/E404|404 Not Found|is not in this registry/i.test(diagnostics)) {
-      throw new Error(
-        `Could not verify registry state for ${name}@${workspace.manifest.version}:\n${diagnostics}`
-      );
-    }
+  const lookup = runNpm(['view', `${name}@${workspace.manifest.version}`, 'version', '--json']);
+  if (lookup.status === 0) {
+    process.stdout.write(`already published: ${name}@${workspace.manifest.version}\n`);
+    continue;
+  }
+  const diagnostics = `${lookup.stdout ?? ''}\n${lookup.stderr ?? ''}`;
+  if (!/E404|404 Not Found|is not in this registry/i.test(diagnostics)) {
+    throw new Error(
+      `Could not verify registry state for ${name}@${workspace.manifest.version}:\n${diagnostics}`
+    );
   }
 
   process.stdout.write(
