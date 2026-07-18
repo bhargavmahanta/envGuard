@@ -51,9 +51,19 @@
 - Packed-package consumer tests and monorepo integration guidance
 - Internal boundary prepared for a future MCP package
 
+## v2.0.0
+
+- Independently versioned core and reporter packages
+- Backward-compatible CLI and SDK facade
+- Node.js 22 minimum runtime
+- Official Node.js, Next.js, Python, and Docker presets
+- Structured Kubernetes and Helm detection
+- Root-restricted, always-masked stdio MCP server
+- Bundled Node 24 GitHub Action
+- Fixture and pinned public-repository release benchmarks
+
 ## Later
 
 - VS Code extension
-- Framework presets
-- MCP server built on the stable public SDK
-- Optional secret validation disabled by default
+- Additional declarative presets and conservative configuration rules
+- Further agent integrations built on the stable SDK and MCP boundaries

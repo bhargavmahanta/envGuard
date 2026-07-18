@@ -1,0 +1,26 @@
+name: Benchmark
+
+on:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-repositories:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run build
+      - run: npm run benchmark:public
+      - uses: actions/upload-artifact@v6
+        with:
+          name: masked-benchmark-results
+          path: benchmarks/results.json

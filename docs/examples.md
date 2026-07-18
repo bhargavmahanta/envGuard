@@ -19,10 +19,10 @@ jobs:
   envguard:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
       - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
@@ -42,7 +42,7 @@ jobs:
 
 ```yaml
 - run: npx @bhargavmahanta/envguard scan . --format sarif --output envguard.sarif
-- uses: github/codeql-action/upload-sarif@v3
+- uses: github/codeql-action/upload-sarif@v4
   with:
     sarif_file: envguard.sarif
 ```
@@ -122,3 +122,39 @@ __pycache__/
 .pytest_cache/
 dist/
 ```
+
+## GitLab CI
+
+```yaml
+envguard:
+  image: node:24-alpine
+  script:
+    - npx --yes @bhargavmahanta/envguard scan . --ci --fail-on high
+```
+
+## Bitbucket Pipelines
+
+```yaml
+pipelines:
+  default:
+    - step:
+        image: node:24-alpine
+        script:
+          - npx --yes @bhargavmahanta/envguard scan . --ci --fail-on high
+```
+
+## Azure DevOps
+
+```yaml
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: "24.x"
+  - script: npx --yes @bhargavmahanta/envguard scan . --ci --fail-on high
+```
+
+## Nx And Turborepo
+
+Add `envguard scan --changed origin/main --ci --fail-on high` as a root task. EnvGuard performs one
+repository scan and deterministically deduplicates files selected by Git, so workspace packages do
+not need separate scanner installations.

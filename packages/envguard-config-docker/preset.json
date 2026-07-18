@@ -1,0 +1,4 @@
+{
+  "rules": {"packs": ["docker"]},
+  "include": ["**/Dockerfile", "**/Dockerfile.*", "**/docker-compose*.{yml,yaml}", "**/compose*.{yml,yaml}"]
+}

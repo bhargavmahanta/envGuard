@@ -1,33 +1,39 @@
 name: EnvGuard
-description: Scan unsafe env, Docker, config, and CI/CD settings with EnvGuard.
+description: Scan env, Docker, CI, Kubernetes, and runtime configuration for security risks.
 author: Bhargav Mahanta
-
+branding:
+  icon: shield
+  color: green
 inputs:
   target:
-    description: File or directory to scan.
+    description: Project path to scan.
     required: false
     default: .
   fail-on:
-    description: Severity threshold for failing the workflow.
+    description: Minimum severity that fails the workflow.
     required: false
     default: high
-  format:
-    description: Report format: terminal, json, markdown, or sarif.
+  minimum-severity:
+    description: Minimum severity included in results.
     required: false
-    default: terminal
-  output:
-    description: Optional report output path.
+  config-path:
+    description: Explicit EnvGuard config path.
     required: false
-    default: ''
-
+  baseline-path:
+    description: Explicit EnvGuard baseline path.
+    required: false
+  sarif-path:
+    description: Optional path where a masked SARIF report is written.
+    required: false
+outputs:
+  passed:
+    description: Whether the scan passed the configured policy.
+  findings-count:
+    description: Number of findings after filtering and baseline suppression.
+  highest-severity:
+    description: Highest reported finding severity.
+  sarif-path:
+    description: SARIF path when requested.
 runs:
-  using: composite
-  steps:
-    - name: Run EnvGuard
-      shell: bash
-      run: |
-        args=("scan" "${{ inputs.target }}" "--ci" "--fail-on" "${{ inputs.fail-on }}" "--format" "${{ inputs.format }}")
-        if [ -n "${{ inputs.output }}" ]; then
-          args+=("--output" "${{ inputs.output }}")
-        fi
-        npx --yes @bhargavmahanta/envguard "${args[@]}"
+  using: node24
+  main: integrations/envguard-action/dist/index.js

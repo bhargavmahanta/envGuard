@@ -1,6 +1,6 @@
 # Compatibility
 
-EnvGuard targets Node.js `>=20`.
+EnvGuard 2 targets Node.js `>=22`. EnvGuard 1 remains available for Node.js 20 projects.
 
 The package is tested on:
 

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@bhargavmahanta/envguard-core": ["../envguard-core/src/index.ts"]
+    },
+    "outDir": "dist",
+    "types": ["node"]
+  },
+  "include": ["src", "../envguard-core/src/picomatch.d.ts", "test/**/*.test.ts", "tsup.config.ts", "vitest.config.ts"]
+}

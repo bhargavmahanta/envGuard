@@ -1,0 +1,27 @@
+{
+  "name": "envguard-action",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bundled GitHub Action for EnvGuard configuration security scanning.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.ts -o dist --minify",
+    "check:dist": "npm run build && git diff --exit-code -- dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bhargavmahanta/envguard": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vercel/ncc": "^0.38.4",
+    "eslint": "^9.5.0",
+    "typescript": "^5.5.2",
+    "vitest": "^4.1.9"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

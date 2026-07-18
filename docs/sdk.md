@@ -6,6 +6,8 @@ Install EnvGuard as a development dependency:
 npm install --save-dev @bhargavmahanta/envguard
 ```
 
+Library integrations that do not need the CLI can install `@bhargavmahanta/envguard-core`. Pure reporters are also available from `@bhargavmahanta/envguard-reporters`; the facade imports below remain fully supported.
+
 ## Scan
 
 ```ts
@@ -87,4 +89,4 @@ const { formatMarkdownReport } = require('@bhargavmahanta/envguard/reporters');
 
 Use one scanner per shared policy and scan package roots independently. Pass an explicit repository `cwd` and package-relative targets so config, ignore, baseline, and containment behavior remain deterministic.
 
-The root package and `/reporters` subpath are the supported import paths. Internal scanner, parser, walker, detector, and masking modules are not public API. Stable APIs follow semantic versioning; optional report fields may be added within V1, while removals or renames require a major release.
+The root package and `/reporters` subpath remain supported facade imports. Internal scanner, parser, walker, detector, and masking modules are not public API. Report schema `1.0.0` remains independent from npm package major versions.

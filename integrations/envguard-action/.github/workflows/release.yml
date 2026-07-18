@@ -1,0 +1,39 @@
+name: Release tags
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  move-major-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run check:dist
+      - name: Move supported aliases
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v1\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "Release tag must match v1.x.y" >&2
+            exit 1
+          fi
+          MINOR_TAG="v1.${BASH_REMATCH[1]}"
+          git tag --force v1 "$RELEASE_TAG"
+          git tag --force "$MINOR_TAG" "$RELEASE_TAG"
+          git push origin refs/tags/v1 --force
+          git push origin "refs/tags/$MINOR_TAG" --force

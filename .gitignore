@@ -1,5 +1,7 @@
 node_modules/
 dist/
+!integrations/envguard-action/dist/
+!integrations/envguard-action/dist/index.js
 coverage/
 .env
 .env.local
@@ -9,3 +11,4 @@ coverage/
 *.log
 sample-report.json
 sample-report.md
+benchmarks/results.json

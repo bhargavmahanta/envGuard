@@ -3,15 +3,18 @@
 > Security linting for env, Docker, CI, and runtime configuration.
 
 [![npm](https://img.shields.io/npm/v/@bhargavmahanta/envguard)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
+[![npm provenance](https://img.shields.io/badge/npm-provenance-verified-brightgreen)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
 [![CI](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml/badge.svg)](https://github.com/bhargavmahanta/envGuard/actions/workflows/test.yml)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 EnvGuard helps developers catch unsafe environment values, risky runtime defaults, Docker/Compose hazards, and CI/CD configuration issues before they reach production. It complements deep secret-history scanners like Gitleaks and TruffleHog rather than replacing them.
 
+EnvGuard V2 is the current stable release and requires Node.js 22 or newer.
+
 ## Quick Start
 
-Run the CLI without installing it globally:
+Run EnvGuard without installing it globally:
 
 ```bash
 npx @bhargavmahanta/envguard scan .
@@ -39,16 +42,19 @@ envguard scan . --agent
 - Check `.env` hygiene and `.env.example` / `.env.schema` drift
 - Detect real-looking secrets, weak secrets, unsafe runtime settings, and wildcard CORS
 - Detect Docker and CI/CD security issues
+- Detect conservative Kubernetes and Helm configuration risks
 - Mask secrets by default in terminal, JSON, Markdown, SARIF, and GitHub annotation reports
 - Support local CLI usage, pre-commit hooks, and GitHub Actions
 - Scan only staged or changed files for fast developer workflows
-- Use the included reusable GitHub Action wrapper
+- Use the bundled `bhargavmahanta/envGuard` GitHub Action
 - Configure behavior with `envguard.config.yml` and `.envguardignore`
 
 ## Installation
 
+Install the stable V2 release:
+
 ```bash
-npx @bhargavmahanta/envguard scan .
+npm install --save-dev @bhargavmahanta/envguard
 ```
 
 Or install globally:
@@ -57,10 +63,24 @@ Or install globally:
 npm install -g @bhargavmahanta/envguard
 ```
 
+EnvGuard releases are published through npm trusted publishing with provenance. Verify the
+installed dependency signatures with `npm audit signatures`.
+
 Install as a project dependency for SDK or build-script usage:
 
 ```bash
 npm install --save-dev @bhargavmahanta/envguard
+```
+
+Use a declarative framework preset:
+
+```bash
+npm install --save-dev @bhargavmahanta/envguard @bhargavmahanta/envguard-config-next
+```
+
+```yaml
+extends:
+  - "@bhargavmahanta/envguard-config-next"
 ```
 
 ## CLI Commands
@@ -77,6 +97,7 @@ envguard baseline audit
 envguard init
 envguard rules
 envguard doctor --json
+envguard explain k8s-privileged
 envguard scan . --agent
 ```
 
@@ -194,9 +215,14 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [Reporting](https://github.com/bhargavmahanta/envGuard/blob/main/docs/reporting.md)
 - [Public API surface](https://github.com/bhargavmahanta/envGuard/blob/main/docs/public-api.md)
 - [SDK guide](https://github.com/bhargavmahanta/envGuard/blob/main/docs/sdk.md)
+- [Presets](https://github.com/bhargavmahanta/envGuard/blob/main/docs/presets.md)
+- [Container image](https://github.com/bhargavmahanta/envGuard/blob/main/docs/containers.md)
+- [Benchmarks](https://github.com/bhargavmahanta/envGuard/blob/main/docs/benchmarks.md)
 - [Agent integration](https://github.com/bhargavmahanta/envGuard/blob/main/docs/agent-integration.md)
-- [Future MCP architecture](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md)
+- [Package family](https://github.com/bhargavmahanta/envGuard/blob/main/docs/package-family.md)
+- [MCP server](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md)
 - [Release process](https://github.com/bhargavmahanta/envGuard/blob/main/docs/releasing.md)
+- [V2.0 release notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/release-notes-v2.md)
 - [V1.0 release notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/release-notes-v1.md)
 - [V1.0 readiness](https://github.com/bhargavmahanta/envGuard/blob/main/docs/v1-readiness.md)
 - [Compatibility](https://github.com/bhargavmahanta/envGuard/blob/main/docs/compatibility.md)

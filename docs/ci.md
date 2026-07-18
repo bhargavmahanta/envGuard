@@ -14,16 +14,23 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   envguard:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: bhargavmahanta/envGuard@main
+      - uses: actions/checkout@v6
+      - uses: bhargavmahanta/envGuard@v2.0.0
         with:
           target: .
           fail-on: high
+          sarif-path: envguard.sarif
+
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: envguard.sarif
 ```
 
 ## npx Setup
@@ -44,11 +51,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
 
       - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
@@ -90,7 +97,7 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -98,9 +105,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
 
       - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```

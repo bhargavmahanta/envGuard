@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.0.0-rc.0] - Unreleased
+
+### Added
+
+- Added independently versioned core, reporter, restricted stdio MCP, and declarative preset packages.
+- Added Kubernetes and Helm rules, rule explanations, fixture benchmarks, and pinned public benchmarks.
+- Added a bundled Node 24 GitHub Action with annotations, summaries, policy failure, and optional SARIF output.
+
+### Changed
+
+- Raised the minimum runtime to Node.js 22 while preserving the primary CLI and SDK facade.
+- Consolidated the unreleased preset, container, Kubernetes, benchmark, MCP, and package-family work into V2.
+
+### Security
+
+- MCP and Action scans force masking and restrict filesystem access to canonical configured roots.
+- Presets remain declarative and reject executable, remote, cyclic, escaping, or duplicate rule definitions.
+
 All notable changes to EnvGuard are documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style sections and uses semantic versioning.

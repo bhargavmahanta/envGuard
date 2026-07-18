@@ -1,0 +1,34 @@
+{
+  "name": "@bhargavmahanta/envguard-config-node",
+  "version": "1.0.0",
+  "description": "Declarative EnvGuard preset for Node.js projects.",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "preset.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./preset.json",
+    "./package.json": "./package.json"
+  },
+  "envguard": {
+    "preset": "./preset.json"
+  },
+  "peerDependencies": {
+    "@bhargavmahanta/envguard": "^2.0.0"
+  },
+  "devDependencies": {
+    "@bhargavmahanta/envguard": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhargavmahanta/envGuard.git",
+    "directory": "packages/envguard-config-node"
+  }
+}
