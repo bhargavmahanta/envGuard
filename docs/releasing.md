@@ -47,20 +47,9 @@ only the eight allowlisted public workspaces under the npm `next` tag. Configure
 environment with required reviewers before use. Never advance `latest` during the candidate cycle.
 
 The first candidate versions are `@bhargavmahanta/envguard@2.0.0-rc.0` and `1.0.0-rc.0` for the
-new core, reporter, MCP, and preset packages. npm trusted publishing can only be configured after a
-package name exists, so the first release has a one-time bootstrap procedure:
-
-1. Configure `@bhargavmahanta/envguard` to trust `release-candidate.yml` with the `npm-release`
-   environment and permission to run `npm publish`.
-2. Create a short-lived granular npm token for the initial package-name creation and store it only as
-   the `NPM_BOOTSTRAP_TOKEN` secret on the protected `npm-release` environment.
-3. Dispatch `release-candidate.yml` for an exact commit SHA with `bootstrap-new-packages` enabled.
-4. Configure the same trusted publisher for the seven newly created packages.
-5. Delete `NPM_BOOTSTRAP_TOKEN` immediately. Leave `bootstrap-new-packages` disabled for every
-   subsequent candidate.
-
-The bootstrap token is an explicit one-release exception, not an automation credential. The
-workflow passes it only to the publish step and still generates npm provenance through GitHub OIDC.
+new core, reporter, MCP, and preset packages. All eight packages trust `release-candidate.yml` with
+the `npm-release` environment and permission to run `npm publish`. Candidate publication uses only
+GitHub OIDC; no npm automation token or bootstrap secret is retained.
 
 To promote stable, run `changeset pre exit`, run the version command, review the resulting `2.0.0`
 and `1.0.0` versions, and merge the stable release PR. Because npm permits one trusted publisher per
@@ -84,13 +73,12 @@ The GitHub release workflow publishes changed workspaces after the Changesets ve
 - permission: allow npm publish
 
 Repeat the trusted-publisher setup for `envguard-core`, `envguard-reporters`, `envguard-mcp`, and
-each preset package after the one-time bootstrap creates those package names.
+each preset package.
 
 The public repository release workflow publishes with npm provenance using GitHub Actions trusted publishing.
 
-Do not retain a long-lived npm automation token. Outside the documented first-release bootstrap, if
-trusted publishing is unavailable, stop the release and repair the package's trusted-publisher
-configuration.
+Do not retain a long-lived npm automation token. If trusted publishing is unavailable, stop the
+release and repair the package's trusted-publisher configuration.
 
 Emergency manual fallback for a single already-versioned workspace:
 
