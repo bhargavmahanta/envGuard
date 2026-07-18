@@ -7,11 +7,6 @@ on:
         description: Exact branch, tag, or commit to publish.
         required: true
         default: adoption-roadmap
-      bootstrap-new-packages:
-        description: Use the protected one-time npm token to create package names that do not exist yet.
-        required: true
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -42,17 +37,4 @@ jobs:
       - run: npm run release:dry
 
       - name: Publish with trusted publishing
-        if: ${{ !inputs.bootstrap-new-packages }}
         run: npm run release:publish:next
-
-      - name: Bootstrap new package names
-        if: ${{ inputs.bootstrap-new-packages }}
-        shell: bash
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
-        run: |
-          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
-            echo "::error::NPM_BOOTSTRAP_TOKEN is required when bootstrap-new-packages is enabled."
-            exit 1
-          fi
-          npm run release:publish:next
