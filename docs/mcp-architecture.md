@@ -3,7 +3,7 @@
 `@bhargavmahanta/envguard-mcp` is a stdio-only MCP server built on the public core and reporter packages.
 
 ```bash
-npx @bhargavmahanta/envguard-mcp@next --root /absolute/project/path
+npx @bhargavmahanta/envguard-mcp --root /absolute/project/path
 ```
 
 Repeat `--root` to expose multiple project roots. Without the option, the server allows only its current working directory. `ENVGUARD_MCP_ROOTS` may also contain a platform-delimited root list.

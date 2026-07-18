@@ -3,7 +3,7 @@
 Install EnvGuard as a development dependency:
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard@next
+npm install --save-dev @bhargavmahanta/envguard
 ```
 
 Library integrations that do not need the CLI can install `@bhargavmahanta/envguard-core`. Pure reporters are also available from `@bhargavmahanta/envguard-reporters`; the facade imports below remain fully supported.

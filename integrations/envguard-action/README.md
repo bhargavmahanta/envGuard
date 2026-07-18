@@ -3,7 +3,7 @@
 Run EnvGuard directly through its SDK with safe masking, annotations, a job summary, policy failure, and optional SARIF output.
 
 ```yaml
-- uses: bhargavmahanta/envGuard@v2.0.0-rc.0
+- uses: bhargavmahanta/envGuard@v2.0.0
   with:
     target: .
     fail-on: high

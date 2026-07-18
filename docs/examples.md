@@ -23,25 +23,25 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npx @bhargavmahanta/envguard@next scan . --ci --fail-on high
+      - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
 ## Pull Request Changed Files
 
 ```yaml
-- run: npx @bhargavmahanta/envguard@next scan --changed origin/main --ci --fail-on high
+- run: npx @bhargavmahanta/envguard scan --changed origin/main --ci --fail-on high
 ```
 
 ## GitHub Annotations
 
 ```yaml
-- run: npx @bhargavmahanta/envguard@next scan . --format github
+- run: npx @bhargavmahanta/envguard scan . --format github
 ```
 
 ## SARIF for GitHub Code Scanning
 
 ```yaml
-- run: npx @bhargavmahanta/envguard@next scan . --format sarif --output envguard.sarif
+- run: npx @bhargavmahanta/envguard scan . --format sarif --output envguard.sarif
 - uses: github/codeql-action/upload-sarif@v4
   with:
     sarif_file: envguard.sarif
@@ -55,7 +55,7 @@ npx husky init
 ```
 
 ```bash
-npx @bhargavmahanta/envguard@next scan --staged --ci --fail-on high
+npx @bhargavmahanta/envguard scan --staged --ci --fail-on high
 ```
 
 ## Custom Rule
@@ -90,13 +90,13 @@ dist
 Then run:
 
 ```bash
-npx @bhargavmahanta/envguard@next scan .
+npx @bhargavmahanta/envguard scan .
 ```
 
 ## Node and Next.js Projects
 
 ```bash
-npx @bhargavmahanta/envguard@next scan . --ci --fail-on high
+npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
 Recommended `.envguardignore`:
@@ -111,7 +111,7 @@ coverage/
 ## Python, Flask, and Django Projects
 
 ```bash
-npx @bhargavmahanta/envguard@next scan . --ci --fail-on high
+npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
 Recommended `.envguardignore`:

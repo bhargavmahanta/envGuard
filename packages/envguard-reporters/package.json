@@ -1,6 +1,6 @@
 {
   "name": "@bhargavmahanta/envguard-reporters",
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0",
   "description": "Pure terminal, JSON, Markdown, SARIF, and GitHub reporters for EnvGuard.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -38,7 +38,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@bhargavmahanta/envguard-core": "^1.0.0-rc.0"
+    "@bhargavmahanta/envguard-core": "^1.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.5.0",

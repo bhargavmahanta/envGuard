@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@bhargavmahanta/envguard": "^2.0.0-rc.0"
+    "@bhargavmahanta/envguard": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

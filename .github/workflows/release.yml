@@ -15,6 +15,7 @@ concurrency: release-${{ github.ref }}
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: npm-release
 
     steps:
       - uses: actions/checkout@v6

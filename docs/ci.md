@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: bhargavmahanta/envGuard@v2.0.0-rc.0
+      - uses: bhargavmahanta/envGuard@v2.0.0
         with:
           target: .
           fail-on: high
@@ -57,25 +57,25 @@ jobs:
         with:
           node-version: 24
 
-      - run: npx @bhargavmahanta/envguard@next scan . --ci --fail-on high
+      - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
 Generate a JSON report:
 
 ```bash
-npx @bhargavmahanta/envguard@next scan . --format json --output envguard-report.json
+npx @bhargavmahanta/envguard scan . --format json --output envguard-report.json
 ```
 
 Generate a Markdown report:
 
 ```bash
-npx @bhargavmahanta/envguard@next scan . --format markdown --output envguard-report.md
+npx @bhargavmahanta/envguard scan . --format markdown --output envguard-report.md
 ```
 
 Generate GitHub Actions annotations:
 
 ```bash
-npx @bhargavmahanta/envguard@next scan . --format github
+npx @bhargavmahanta/envguard scan . --format github
 ```
 
 ## Pair With Gitleaks
@@ -109,7 +109,7 @@ jobs:
         with:
           node-version: 24
 
-      - run: npx @bhargavmahanta/envguard@next scan . --ci --fail-on high
+      - run: npx @bhargavmahanta/envguard scan . --ci --fail-on high
 ```
 
 On Windows PowerShell, use the `.cmd` shim if script execution blocks `envguard.ps1`:

@@ -39,14 +39,14 @@ npm run release:dry
 
 ## Publishing
 
-### V2 release candidate
+### Prerelease candidates
 
-V2 prereleases remain on the `adoption-roadmap` branch in Changesets `rc` mode. The protected
+V2 prereleases used the `adoption-roadmap` branch in Changesets `rc` mode. The protected
 `release-candidate.yml` workflow accepts an exact ref, runs the complete release gate, and publishes
 only the eight allowlisted public workspaces under the npm `next` tag. Configure its `npm-release`
 environment with required reviewers before use. Never advance `latest` during the candidate cycle.
 
-The first candidate versions are `@bhargavmahanta/envguard@2.0.0-rc.0` and `1.0.0-rc.0` for the
+The first candidate versions were `@bhargavmahanta/envguard@2.0.0-rc.0` and `1.0.0-rc.0` for the
 new core, reporter, MCP, and preset packages. All eight packages trust `release-candidate.yml` with
 the `npm-release` environment and permission to run `npm publish`. Candidate publication uses only
 GitHub OIDC; no npm automation token or bootstrap secret is retained.

@@ -10,14 +10,14 @@
 
 EnvGuard helps developers catch unsafe environment values, risky runtime defaults, Docker/Compose hazards, and CI/CD configuration issues before they reach production. It complements deep secret-history scanners like Gitleaks and TruffleHog rather than replacing them.
 
-EnvGuard V2 is currently available as a release candidate and requires Node.js 22 or newer.
+EnvGuard V2 is the current stable release and requires Node.js 22 or newer.
 
 ## Quick Start
 
-Run the V2 release candidate without installing it globally:
+Run EnvGuard without installing it globally:
 
 ```bash
-npx @bhargavmahanta/envguard@next scan .
+npx @bhargavmahanta/envguard scan .
 ```
 
 Use the SDK from TypeScript or JavaScript:
@@ -51,18 +51,16 @@ envguard scan . --agent
 
 ## Installation
 
-V2 release candidate:
+Install the stable V2 release:
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard@next
+npm install --save-dev @bhargavmahanta/envguard
 ```
-
-The `latest` npm tag remains on EnvGuard 1.2 until V2 is promoted to stable.
 
 Or install globally:
 
 ```bash
-npm install -g @bhargavmahanta/envguard@next
+npm install -g @bhargavmahanta/envguard
 ```
 
 EnvGuard releases are published through npm trusted publishing with provenance. Verify the
@@ -71,13 +69,13 @@ installed dependency signatures with `npm audit signatures`.
 Install as a project dependency for SDK or build-script usage:
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard@next
+npm install --save-dev @bhargavmahanta/envguard
 ```
 
 Use a declarative framework preset:
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard@next @bhargavmahanta/envguard-config-next@next
+npm install --save-dev @bhargavmahanta/envguard @bhargavmahanta/envguard-config-next
 ```
 
 ```yaml
@@ -224,6 +222,7 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [Package family](https://github.com/bhargavmahanta/envGuard/blob/main/docs/package-family.md)
 - [MCP server](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md)
 - [Release process](https://github.com/bhargavmahanta/envGuard/blob/main/docs/releasing.md)
+- [V2.0 release notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/release-notes-v2.md)
 - [V1.0 release notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/release-notes-v1.md)
 - [V1.0 readiness](https://github.com/bhargavmahanta/envGuard/blob/main/docs/v1-readiness.md)
 - [Compatibility](https://github.com/bhargavmahanta/envGuard/blob/main/docs/compatibility.md)

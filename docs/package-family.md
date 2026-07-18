@@ -1,6 +1,6 @@
 # Package Family
 
-EnvGuard 2 uses independently versioned npm packages while keeping `@bhargavmahanta/envguard` as the normal installation and compatibility facade. The V2 release candidate is published under the npm `next` tag; `latest` remains on V1 until stable promotion.
+EnvGuard 2 uses independently versioned npm packages while keeping `@bhargavmahanta/envguard` as the normal installation and compatibility facade. Stable packages use the npm `latest` tag; prereleases use `next`.
 
 | Package | Purpose |
 | --- | --- |
@@ -13,7 +13,7 @@ EnvGuard 2 uses independently versioned npm packages while keeping `@bhargavmaha
 Most projects should continue to install only the facade:
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard@next
+npm install --save-dev @bhargavmahanta/envguard
 ```
 
 Library authors can depend on core to avoid CLI dependencies, or reporters when they only format an existing `ScanResult`. Existing root SDK imports and `@bhargavmahanta/envguard/reporters` remain supported in V2.
@@ -25,7 +25,7 @@ EnvGuard 2 requires Node.js 22 or newer. Projects that must remain on Node.js 20
 For most CLI and SDK consumers, migration is limited to upgrading Node.js and the package:
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard@next
+npm install --save-dev @bhargavmahanta/envguard
 ```
 
 The `envguard` executable, root SDK imports, `/reporters` subpath, rule IDs, configuration keys,

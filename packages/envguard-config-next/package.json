@@ -1,6 +1,6 @@
 {
   "name": "@bhargavmahanta/envguard-config-next",
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0",
   "description": "Declarative EnvGuard preset for Next.js projects.",
   "license": "MIT",
   "type": "module",
@@ -17,13 +17,13 @@
     "preset": "./preset.json"
   },
   "dependencies": {
-    "@bhargavmahanta/envguard-config-node": "^1.0.0-rc.0"
+    "@bhargavmahanta/envguard-config-node": "^1.0.0"
   },
   "peerDependencies": {
-    "@bhargavmahanta/envguard": "^2.0.0-rc.0"
+    "@bhargavmahanta/envguard": "^2.0.0"
   },
   "devDependencies": {
-    "@bhargavmahanta/envguard": "^2.0.0-rc.0"
+    "@bhargavmahanta/envguard": "^2.0.0"
   },
   "publishConfig": {
     "access": "public",
