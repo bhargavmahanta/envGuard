@@ -1,7 +1,7 @@
 {
   "name": "@bhargavmahanta/envguard",
   "version": "2.0.0",
-  "description": "Security linting for env, Docker, CI, and runtime configuration.",
+  "description": "Security linter for environment variables, Docker, CI, Kubernetes, and runtime configuration.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -68,7 +68,15 @@
     "typescript",
     "github-actions",
     "docker-security",
-    "configuration-security"
+    "configuration-security",
+    "environment-variables",
+    "env-security",
+    "configuration-linting",
+    "kubernetes-security",
+    "helm-security",
+    "ci-security",
+    "mcp-server",
+    "security-linter"
   ],
   "dependencies": {
     "@bhargavmahanta/envguard-core": "^1.0.0",

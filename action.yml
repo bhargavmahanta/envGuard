@@ -1,5 +1,5 @@
-name: EnvGuard
-description: Scan env, Docker, CI, Kubernetes, and runtime configuration for security risks.
+name: EnvGuard Configuration Security
+description: Find insecure environment values and Docker, CI, Kubernetes, and runtime configuration before production.
 author: Bhargav Mahanta
 branding:
   icon: shield

@@ -1,6 +1,6 @@
 # EnvGuard
 
-> Security linting for env, Docker, CI, and runtime configuration.
+> Security linting for environment variables, Docker, CI, Kubernetes, and runtime configuration.
 
 [![npm](https://img.shields.io/npm/v/@bhargavmahanta/envguard)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
 [![npm provenance](https://img.shields.io/badge/npm-provenance-verified-brightgreen)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
@@ -10,7 +10,11 @@
 
 EnvGuard helps developers catch unsafe environment values, risky runtime defaults, Docker/Compose hazards, and CI/CD configuration issues before they reach production. It complements deep secret-history scanners like Gitleaks and TruffleHog rather than replacing them.
 
+EnvGuard V2 is the current stable release and requires Node.js 22 or newer.
+
 ## Quick Start
+
+### CLI
 
 Run the CLI without installing it globally:
 
@@ -18,7 +22,34 @@ Run the CLI without installing it globally:
 npx @bhargavmahanta/envguard scan .
 ```
 
-Use the SDK from TypeScript or JavaScript:
+### GitHub Action
+
+Add EnvGuard to pull requests without installing it in the repository:
+
+```yaml
+name: EnvGuard
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  envguard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: bhargavmahanta/envGuard@v2
+        with:
+          fail-on: high
+```
+
+See the [complete CI guide](https://github.com/bhargavmahanta/envGuard/blob/main/docs/ci.md) for SARIF uploads, annotations, and immutable version pins.
+
+### SDK
+
+Use EnvGuard from TypeScript or JavaScript:
 
 ```ts
 import { scan } from "@bhargavmahanta/envguard";
@@ -27,11 +58,15 @@ const result = await scan({ target: ".", failOn: "high" });
 console.log(result.passed, result.findings);
 ```
 
-Use deterministic output from build systems and coding agents:
+### Agents and MCP
+
+Use deterministic, always-masked JSON from build systems and coding agents:
 
 ```bash
-envguard scan . --agent
+npx @bhargavmahanta/envguard scan . --agent
 ```
+
+For tool-based integrations, use the root-restricted [EnvGuard MCP server](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md). See the [agent integration guide](https://github.com/bhargavmahanta/envGuard/blob/main/docs/agent-integration.md) for exit codes and safe focused scans.
 
 ## Features
 
@@ -44,13 +79,15 @@ envguard scan . --agent
 - Mask secrets by default in terminal, JSON, Markdown, SARIF, and GitHub annotation reports
 - Support local CLI usage, pre-commit hooks, and GitHub Actions
 - Scan only staged or changed files for fast developer workflows
-- Use the dedicated `bhargavmahanta/envguard-action` integration
+- Use the bundled `bhargavmahanta/envGuard@v2` GitHub Action
 - Configure behavior with `envguard.config.yml` and `.envguardignore`
 
 ## Installation
 
+Install the stable V2 release:
+
 ```bash
-npx @bhargavmahanta/envguard scan .
+npm install --save-dev @bhargavmahanta/envguard
 ```
 
 Or install globally:
@@ -61,12 +98,6 @@ npm install -g @bhargavmahanta/envguard
 
 EnvGuard releases are published through npm trusted publishing with provenance. Verify the
 installed dependency signatures with `npm audit signatures`.
-
-Install as a project dependency for SDK or build-script usage:
-
-```bash
-npm install --save-dev @bhargavmahanta/envguard
-```
 
 Use a declarative framework preset:
 
@@ -186,15 +217,15 @@ sarif
 github
 ```
 
-## Sample Vulnerable Project
+## How EnvGuard Fits
 
-Try EnvGuard against the included fake vulnerable project:
+| Tool | Primary focus | Use with EnvGuard for |
+| --- | --- | --- |
+| EnvGuard | Environment, runtime, Docker, Kubernetes, and CI configuration | Fast configuration-security feedback before production |
+| Gitleaks | Git history and repository secret scanning | Deep secret-history coverage |
+| TruffleHog | Broad secret discovery and credential verification | Incident response and verified credential detection |
 
-```bash
-npm install
-npm run build
-node dist/cli.js scan examples/vulnerable-project
-```
+EnvGuard does not replace a git-history secret scanner. See the [full comparison and recommended pairing](https://github.com/bhargavmahanta/envGuard/blob/main/docs/comparison.md).
 
 ## Limitations
 
@@ -224,6 +255,11 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [Compatibility](https://github.com/bhargavmahanta/envGuard/blob/main/docs/compatibility.md)
 - [Design notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/design.md)
 - [Roadmap](https://github.com/bhargavmahanta/envGuard/blob/main/docs/roadmap.md)
+
+## Community
+
+- Read the [contribution guide](https://github.com/bhargavmahanta/envGuard/blob/main/CONTRIBUTING.md) before opening a pull request.
+- Report sensitive vulnerabilities through the process in the [security policy](https://github.com/bhargavmahanta/envGuard/blob/main/SECURITY.md).
 
 ## License
 

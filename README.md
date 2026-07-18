@@ -1,6 +1,6 @@
 # EnvGuard
 
-> Security linting for env, Docker, CI, and runtime configuration.
+> Security linting for environment variables, Docker, CI, Kubernetes, and runtime configuration.
 
 [![npm](https://img.shields.io/npm/v/@bhargavmahanta/envguard)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
 [![npm provenance](https://img.shields.io/badge/npm-provenance-verified-brightgreen)](https://www.npmjs.com/package/@bhargavmahanta/envguard)
@@ -14,13 +14,42 @@ EnvGuard V2 is the current stable release and requires Node.js 22 or newer.
 
 ## Quick Start
 
+### CLI
+
 Run EnvGuard without installing it globally:
 
 ```bash
 npx @bhargavmahanta/envguard scan .
 ```
 
-Use the SDK from TypeScript or JavaScript:
+### GitHub Action
+
+Add EnvGuard to pull requests without installing it in the repository:
+
+```yaml
+name: EnvGuard
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  envguard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: bhargavmahanta/envGuard@v2
+        with:
+          fail-on: high
+```
+
+See the [complete CI guide](docs/ci.md) for SARIF uploads, annotations, and immutable version pins.
+
+### SDK
+
+Use EnvGuard from TypeScript or JavaScript:
 
 ```ts
 import { scan } from "@bhargavmahanta/envguard";
@@ -29,11 +58,15 @@ const result = await scan({ target: ".", failOn: "high" });
 console.log(result.passed, result.findings);
 ```
 
-Use deterministic output from build systems and coding agents:
+### Agents and MCP
+
+Use deterministic, always-masked JSON from build systems and coding agents:
 
 ```bash
-envguard scan . --agent
+npx @bhargavmahanta/envguard scan . --agent
 ```
+
+For tool-based integrations, use the root-restricted [EnvGuard MCP server](docs/mcp-architecture.md). See the [agent integration guide](docs/agent-integration.md) for exit codes and safe focused scans.
 
 ## Features
 
@@ -46,7 +79,7 @@ envguard scan . --agent
 - Mask secrets by default in terminal, JSON, Markdown, SARIF, and GitHub annotation reports
 - Support local CLI usage, pre-commit hooks, and GitHub Actions
 - Scan only staged or changed files for fast developer workflows
-- Use the bundled `bhargavmahanta/envGuard` GitHub Action
+- Use the bundled `bhargavmahanta/envGuard@v2` GitHub Action
 - Configure behavior with `envguard.config.yml` and `.envguardignore`
 
 ## Installation
@@ -65,12 +98,6 @@ npm install -g @bhargavmahanta/envguard
 
 EnvGuard releases are published through npm trusted publishing with provenance. Verify the
 installed dependency signatures with `npm audit signatures`.
-
-Install as a project dependency for SDK or build-script usage:
-
-```bash
-npm install --save-dev @bhargavmahanta/envguard
-```
 
 Use a declarative framework preset:
 
@@ -197,8 +224,18 @@ Try EnvGuard against the included fake vulnerable project:
 ```bash
 npm install
 npm run build
-node dist/cli.js scan examples/vulnerable-project
+node packages/envguard/dist/cli.js scan examples/vulnerable-project
 ```
+
+## How EnvGuard Fits
+
+| Tool | Primary focus | Use with EnvGuard for |
+| --- | --- | --- |
+| EnvGuard | Environment, runtime, Docker, Kubernetes, and CI configuration | Fast configuration-security feedback before production |
+| Gitleaks | Git history and repository secret scanning | Deep secret-history coverage |
+| TruffleHog | Broad secret discovery and credential verification | Incident response and verified credential detection |
+
+EnvGuard does not replace a git-history secret scanner. See the [full comparison and recommended pairing](docs/comparison.md).
 
 ## Limitations
 
@@ -228,6 +265,11 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [Compatibility](https://github.com/bhargavmahanta/envGuard/blob/main/docs/compatibility.md)
 - [Design notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/design.md)
 - [Roadmap](https://github.com/bhargavmahanta/envGuard/blob/main/docs/roadmap.md)
+
+## Community
+
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+- Report sensitive vulnerabilities privately according to [SECURITY.md](SECURITY.md).
 
 ## License
 
