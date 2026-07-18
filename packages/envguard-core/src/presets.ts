@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { createRequire } from 'node:module';
+import * as nodeModule from 'node:module';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import { z } from 'zod';
@@ -120,7 +120,7 @@ async function resolvePresetPath(specifier: string, baseDir: string): Promise<st
   }
 
   try {
-    const resolver = createRequire(path.join(baseDir, '__envguard_preset_resolver__.cjs'));
+    const resolver = nodeModule.createRequire(path.join(baseDir, '__envguard_preset_resolver__.cjs'));
     const manifestPath = resolver.resolve(`${specifier}/package.json`);
     const packageRoot = path.dirname(manifestPath);
     const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8')) as {
