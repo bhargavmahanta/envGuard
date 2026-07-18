@@ -1,6 +1,5 @@
 import { Command } from 'commander';
-import { ConfigError } from '../../errors.js';
-import { getRule } from '../../rules/catalog.js';
+import { ConfigError, getRule } from '@bhargavmahanta/envguard-core';
 import { reportCommandError, type CliContext } from '../context.js';
 
 export function registerExplainCommand(program: Command, context: CliContext): void {

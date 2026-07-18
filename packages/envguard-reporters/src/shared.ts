@@ -1,5 +1,4 @@
-import { maskSensitivePreview } from '../masking.js';
-import type { Finding, ScanResult } from '../types.js';
+import { maskSensitivePreview, type Finding, type ScanResult } from '@bhargavmahanta/envguard-core';
 
 export interface ReporterOptions {
   color?: boolean;

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { RULES } from '../../rules/catalog.js';
+import { RULES } from '@bhargavmahanta/envguard-core';
 import type { CliContext } from '../context.js';
 
 export function registerRulesCommand(program: Command, context: CliContext): void {

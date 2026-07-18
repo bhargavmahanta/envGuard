@@ -1,0 +1,55 @@
+{
+  "name": "@bhargavmahanta/envguard-reporters",
+  "version": "1.0.0-rc.0",
+  "description": "Pure terminal, JSON, Markdown, SARIF, and GitHub reporters for EnvGuard.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": "Bhargav Mahanta",
+  "license": "MIT",
+  "homepage": "https://github.com/bhargavmahanta/envGuard#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhargavmahanta/envGuard.git",
+    "directory": "packages/envguard-reporters"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bhargavmahanta/envguard-core": "^1.0.0-rc.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.5.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.5.0",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.2",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^4.1.9"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

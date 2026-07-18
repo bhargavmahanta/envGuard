@@ -4,21 +4,24 @@
   "private": true,
   "description": "EnvGuard npm workspace and release tooling.",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "integrations/envguard-action"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspace @bhargavmahanta/envguard",
-    "lint": "npm run lint --workspace @bhargavmahanta/envguard",
-    "typecheck": "npm run typecheck --workspace @bhargavmahanta/envguard",
-    "test:package": "npm run test:package --workspace @bhargavmahanta/envguard",
+    "build": "npm run build --workspace @bhargavmahanta/envguard-core && npm run build --workspace @bhargavmahanta/envguard-reporters && npm run build --workspace @bhargavmahanta/envguard && npm run build --workspace @bhargavmahanta/envguard-mcp && npm run build --workspace envguard-action",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test:package": "npm run build && npm run test:consumers --workspace @bhargavmahanta/envguard && npm run check:dist --workspace envguard-action",
     "security:env": "npm run security:env --workspace @bhargavmahanta/envguard",
     "benchmark:fixtures": "npm run build --workspace @bhargavmahanta/envguard && node benchmarks/run.mjs",
     "benchmark:public": "node benchmarks/run.mjs --public",
     "changeset": "changeset",
     "release:version": "changeset version",
     "release:publish": "changeset publish",
-    "release:dry": "npm run typecheck && npm run lint && npm test && npm run benchmark:fixtures && npm audit && npm run test:package && npm pack --dry-run --workspaces"
+    "release:publish:next": "node scripts/publish-workspaces.mjs --tag next",
+    "publish:dry": "node scripts/publish-workspaces.mjs --tag auto --dry-run",
+    "release:dry": "npm run typecheck && npm run lint && npm test && npm run benchmark:fixtures && npm run benchmark:public && npm audit && npm run test:package && npm pack --dry-run --workspaces && npm run publish:dry"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.2",
@@ -28,6 +31,6 @@
     "esbuild": "^0.28.1"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

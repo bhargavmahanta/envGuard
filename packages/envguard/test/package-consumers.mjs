@@ -6,6 +6,9 @@ import path from 'node:path';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
 const workspaceRoot = path.resolve(projectRoot, '..', '..');
+const expectedFacadeVersion = JSON.parse(
+  await fs.readFile(path.join(projectRoot, 'package.json'), 'utf8')
+).version;
 const fixturesRoot = path.join(projectRoot, 'test', 'fixtures', 'consumers');
 const npmCliPath = process.env.npm_execpath;
 if (!npmCliPath) throw new Error('test:consumers must be run through npm.');
@@ -35,12 +38,12 @@ function run(command, args, cwd, expectedExitCodes = [0]) {
   });
 }
 
-async function installFixture(name, tarballPath, tempRoot) {
+async function installFixture(name, tarballPaths, tempRoot) {
   const target = path.join(tempRoot, name);
   await fs.cp(path.join(fixturesRoot, name), target, { recursive: true });
   await run(
     process.execPath,
-    [npmCliPath, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--no-package-lock', tarballPath],
+    [npmCliPath, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--no-package-lock', ...tarballPaths],
     target
   );
   return target;
@@ -48,25 +51,43 @@ async function installFixture(name, tarballPath, tempRoot) {
 
 const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'envguard-consumers-'));
 try {
-  const packed = await run(
-    process.execPath,
-    [npmCliPath, 'pack', '--json', '--pack-destination', tempRoot],
-    projectRoot
-  );
-  const packageInfo = JSON.parse(packed.stdout)[0];
-  const tarballPath = path.join(tempRoot, packageInfo.filename);
-  assert.ok(
-    packageInfo.files.every(({ path: filePath }) =>
-      filePath === 'LICENSE' ||
-      filePath === 'README.md' ||
-      filePath === 'package.json' ||
-      filePath.startsWith('dist/')
-    ),
-    'Tarball contains a file outside the package allowlist.'
-  );
+  const packageRoots = [
+    path.join(workspaceRoot, 'packages', 'envguard-core'),
+    path.join(workspaceRoot, 'packages', 'envguard-reporters'),
+    projectRoot,
+    path.join(workspaceRoot, 'packages', 'envguard-mcp')
+  ];
+  const tarballPaths = [];
+  for (const packageRoot of packageRoots) {
+    const packed = await run(
+      process.execPath,
+      [npmCliPath, 'pack', '--json', '--pack-destination', tempRoot],
+      packageRoot
+    );
+    const packageInfo = JSON.parse(packed.stdout)[0];
+    assert.ok(
+      packageInfo.files.every(({ path: filePath }) =>
+        filePath === 'LICENSE' ||
+        filePath === 'README.md' ||
+        filePath === 'package.json' ||
+        filePath.startsWith('dist/')
+      ),
+      `${packageInfo.name} tarball contains a file outside the package allowlist.`
+    );
+    tarballPaths.push(path.join(tempRoot, packageInfo.filename));
+  }
 
-  const esm = await installFixture('esm', tarballPath, tempRoot);
+  const esm = await installFixture('esm', tarballPaths, tempRoot);
   await run(process.execPath, ['index.mjs'], esm);
+  await run(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      "const core = await import('@bhargavmahanta/envguard-core'); const reporters = await import('@bhargavmahanta/envguard-reporters'); const mcp = await import('@bhargavmahanta/envguard-mcp'); if (!core.scan || !reporters.renderReport || !mcp.createEnvGuardMcpServer) process.exit(1);"
+    ],
+    esm
+  );
   const blockedImport = await run(
     process.execPath,
     ['--input-type=module', '-e', "await import('@bhargavmahanta/envguard/scanner')"],
@@ -75,15 +96,15 @@ try {
   );
   assert.match(blockedImport.stderr, /ERR_PACKAGE_PATH_NOT_EXPORTED|not defined by "exports"/);
 
-  const commonjs = await installFixture('commonjs', tarballPath, tempRoot);
+  const commonjs = await installFixture('commonjs', tarballPaths, tempRoot);
   await run(process.execPath, ['index.cjs'], commonjs);
 
-  const typescript = await installFixture('typescript', tarballPath, tempRoot);
+  const typescript = await installFixture('typescript', tarballPaths, tempRoot);
   const tscPath = path.join(workspaceRoot, 'node_modules', 'typescript', 'bin', 'tsc');
   await run(process.execPath, [tscPath, '--project', 'tsconfig.json'], typescript);
   await run(process.execPath, ['dist/index.js'], typescript);
 
-  const cli = await installFixture('cli', tarballPath, tempRoot);
+  const cli = await installFixture('cli', tarballPaths, tempRoot);
   const shim = path.join(
     cli,
     'node_modules',
@@ -104,7 +125,19 @@ try {
   );
   const report = JSON.parse(npxScan.stdout);
   assert.equal(report.tool, 'envguard');
+  assert.equal(report.version, expectedFacadeVersion);
   assert.ok(!npxScan.stdout.includes('JWT_SECRET=secret'));
+
+  const mcpShim = path.join(
+    cli,
+    'node_modules',
+    '.bin',
+    process.platform === 'win32' ? 'envguard-mcp.cmd' : 'envguard-mcp'
+  );
+  const invalidMcp = process.platform === 'win32'
+    ? await run(process.env.ComSpec ?? 'cmd.exe', ['/d', '/c', 'call', mcpShim, '--unknown'], cli, [2])
+    : await run(mcpShim, ['--unknown'], cli, [2]);
+  assert.equal(invalidMcp.stdout, '');
 } finally {
   await fs.rm(tempRoot, { recursive: true, force: true });
 }

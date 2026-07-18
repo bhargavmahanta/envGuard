@@ -1,5 +1,7 @@
 node_modules/
 dist/
+!integrations/envguard-action/dist/
+!integrations/envguard-action/dist/index.js
 coverage/
 .env
 .env.local

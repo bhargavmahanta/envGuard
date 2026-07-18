@@ -1,4 +1,4 @@
-import type { ScanResult } from '../types.js';
+import type { ScanResult } from '@bhargavmahanta/envguard-core';
 import { escapeMarkdown, prepareResult, type ReporterOptions } from './shared.js';
 
 export function formatMarkdownReport(result: ScanResult, options: ReporterOptions = {}): string {

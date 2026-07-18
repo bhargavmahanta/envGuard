@@ -8,7 +8,8 @@ workflow stores only aggregate file counts, finding counts, rule IDs, and durati
 finding previews or possible credential values.
 
 The initial public ceilings allow at most a 20 percent increase over the reviewed baseline counts.
-Zero-finding repositories must remain at zero.
+Zero-finding repositories must remain at zero. Reviewed runtime ceilings also fail the scheduled job
+when scanning becomes materially slower.
 
 Update a public benchmark commit only in a reviewed pull request. Rule changes must add positive,
 negative, and false-positive fixtures before adjusting a finding-count ceiling.

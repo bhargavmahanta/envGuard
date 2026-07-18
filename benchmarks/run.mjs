@@ -70,6 +70,9 @@ if (!publicMode) {
       if (result.findings > repository.maximumFindings) {
         throw new Error(`${repository.name} exceeded its masked finding-count ceiling.`);
       }
+      if (result.durationMs > repository.maximumDurationMs) {
+        throw new Error(`${repository.name} exceeded its ${repository.maximumDurationMs}ms runtime ceiling.`);
+      }
       results.push(result);
     }
   } finally {

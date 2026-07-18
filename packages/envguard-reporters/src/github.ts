@@ -1,4 +1,4 @@
-import type { ScanResult } from '../types.js';
+import type { ScanResult } from '@bhargavmahanta/envguard-core';
 import { escapeAnnotation, prepareResult, type ReporterOptions } from './shared.js';
 
 export function formatGitHubReport(result: ScanResult, options: ReporterOptions = {}): string {

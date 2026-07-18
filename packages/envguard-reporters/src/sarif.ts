@@ -1,4 +1,4 @@
-import type { Finding, ScanResult } from '../types.js';
+import type { Finding, ScanResult } from '@bhargavmahanta/envguard-core';
 import { prepareResult, type ReporterOptions } from './shared.js';
 
 function sarifLevel(severity: Finding['severity']): 'error' | 'warning' | 'note' {

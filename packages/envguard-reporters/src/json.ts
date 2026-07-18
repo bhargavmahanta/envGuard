@@ -1,4 +1,4 @@
-import type { ScanResult } from '../types.js';
+import type { ScanResult } from '@bhargavmahanta/envguard-core';
 import { prepareResult, type ReporterOptions } from './shared.js';
 
 export function formatJsonReport(result: ScanResult, options: ReporterOptions = {}): string {

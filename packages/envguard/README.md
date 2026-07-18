@@ -15,7 +15,7 @@ EnvGuard helps developers catch unsafe environment values, risky runtime default
 Run the CLI without installing it globally:
 
 ```bash
-npx @bhargavmahanta/envguard scan .
+npx @bhargavmahanta/envguard@next scan .
 ```
 
 Use the SDK from TypeScript or JavaScript:
@@ -41,23 +41,22 @@ envguard scan . --agent
 - Detect real-looking secrets, weak secrets, unsafe runtime settings, and wildcard CORS
 - Detect Docker and CI/CD security issues
 - Detect conservative Kubernetes and Helm configuration risks
-- Detect conservative Kubernetes and Helm configuration risks
 - Mask secrets by default in terminal, JSON, Markdown, SARIF, and GitHub annotation reports
 - Support local CLI usage, pre-commit hooks, and GitHub Actions
 - Scan only staged or changed files for fast developer workflows
-- Use the included reusable GitHub Action wrapper
+- Use the dedicated `bhargavmahanta/envguard-action` integration
 - Configure behavior with `envguard.config.yml` and `.envguardignore`
 
 ## Installation
 
 ```bash
-npx @bhargavmahanta/envguard scan .
+npx @bhargavmahanta/envguard@next scan .
 ```
 
 Or install globally:
 
 ```bash
-npm install -g @bhargavmahanta/envguard
+npm install -g @bhargavmahanta/envguard@next
 ```
 
 EnvGuard releases are published through npm trusted publishing with provenance. Verify the
@@ -66,24 +65,13 @@ installed dependency signatures with `npm audit signatures`.
 Install as a project dependency for SDK or build-script usage:
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard
+npm install --save-dev @bhargavmahanta/envguard@next
 ```
 
 Use a declarative framework preset:
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard @bhargavmahanta/envguard-config-next
-```
-
-```yaml
-extends:
-  - "@bhargavmahanta/envguard-config-next"
-```
-
-Use a declarative framework preset:
-
-```bash
-npm install --save-dev @bhargavmahanta/envguard @bhargavmahanta/envguard-config-next
+npm install --save-dev @bhargavmahanta/envguard@next @bhargavmahanta/envguard-config-next@next
 ```
 
 ```yaml
@@ -105,7 +93,6 @@ envguard baseline audit
 envguard init
 envguard rules
 envguard doctor --json
-envguard explain k8s-privileged
 envguard explain k8s-privileged
 envguard scan . --agent
 ```
@@ -230,7 +217,8 @@ EnvGuard uses pattern-based and heuristic detection. It may produce false positi
 - [Benchmarks](https://github.com/bhargavmahanta/envGuard/blob/main/docs/benchmarks.md)
 - [Presets](https://github.com/bhargavmahanta/envGuard/blob/main/docs/presets.md)
 - [Agent integration](https://github.com/bhargavmahanta/envGuard/blob/main/docs/agent-integration.md)
-- [Future MCP architecture](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md)
+- [Package family](https://github.com/bhargavmahanta/envGuard/blob/main/docs/package-family.md)
+- [MCP server](https://github.com/bhargavmahanta/envGuard/blob/main/docs/mcp-architecture.md)
 - [Release process](https://github.com/bhargavmahanta/envGuard/blob/main/docs/releasing.md)
 - [V1.0 release notes](https://github.com/bhargavmahanta/envGuard/blob/main/docs/release-notes-v1.md)
 - [V1.0 readiness](https://github.com/bhargavmahanta/envGuard/blob/main/docs/v1-readiness.md)

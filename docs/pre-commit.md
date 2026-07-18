@@ -24,7 +24,7 @@ npx husky init
 Add this to `.husky/pre-commit`:
 
 ```bash
-npx @bhargavmahanta/envguard scan --staged --ci --fail-on high
+npx @bhargavmahanta/envguard@next scan --staged --ci --fail-on high
 ```
 
 On Windows PowerShell, use:

@@ -1,16 +1,17 @@
-# Future MCP Architecture
+# EnvGuard MCP
 
-EnvGuard does not currently ship an MCP server. A future `@envguard/mcp` package should be developed only after the public SDK contract has proven stable.
+`@bhargavmahanta/envguard-mcp` is a stdio-only MCP server built on the public core and reporter packages.
 
-The MCP package must depend on `@bhargavmahanta/envguard` and its public reporter APIs. It must not import scanner, parser, detector, walker, masking, baseline, or rule-engine internals.
+```bash
+npx @bhargavmahanta/envguard-mcp@next --root /absolute/project/path
+```
 
-Candidate read-only tools are:
+Repeat `--root` to expose multiple project roots. Without the option, the server allows only its current working directory. `ENVGUARD_MCP_ROOTS` may also contain a platform-delimited root list.
 
-- `envguard_scan_repository`
-- `envguard_scan_files`
-- `envguard_explain_finding`
-- `envguard_list_rules`
-- `envguard_get_remediation`
-- `envguard_validate_config`
+The server exposes three read-only tools:
 
-The server should preserve SDK masking and path-containment defaults, make no credential-validation requests, expose no full secrets, and avoid write or autofix tools in its initial release.
+- `scan`: scan a contained target with forced masking.
+- `rules`: list built-in rule metadata.
+- `doctor`: check Node.js and configuration loading for allowed roots.
+
+Every target is canonicalized before scanning and must remain inside an allowed root. Symbolic-link traversal, ignored-file scanning, credential validation, write tools, network validation, and unmasked output are not supported. Protocol output uses stdout; startup failures use stderr.

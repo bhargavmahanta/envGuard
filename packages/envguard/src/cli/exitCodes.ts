@@ -5,7 +5,7 @@ import {
   ScanAbortedError,
   TargetAccessError,
   TargetNotFoundError
-} from '../errors.js';
+} from '@bhargavmahanta/envguard-core';
 
 export const EXIT_CODES = {
   success: 0,

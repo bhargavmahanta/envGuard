@@ -1,5 +1,5 @@
 import { Command, CommanderError } from 'commander';
-import { VERSION } from '../defaults.js';
+import { VERSION } from '../version.js';
 import { registerBaselineCommand } from './commands/baseline.js';
 import { registerDoctorCommand } from './commands/doctor.js';
 import { registerExplainCommand } from './commands/explain.js';

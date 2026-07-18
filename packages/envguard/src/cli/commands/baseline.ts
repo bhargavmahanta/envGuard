@@ -1,8 +1,8 @@
 import path from 'node:path';
 import chalk from 'chalk';
 import { Command } from 'commander';
-import { defaultBaselinePath, loadBaselineFile } from '../../baseline.js';
-import { scan } from '../../index.js';
+import { defaultBaselinePath, loadBaselineFile } from '@bhargavmahanta/envguard-core';
+import { scan } from '../../sdk/scan.js';
 import { reportCommandError, type CliContext } from '../context.js';
 
 export function registerBaselineCommand(program: Command, context: CliContext): void {

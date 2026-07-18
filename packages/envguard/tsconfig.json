@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2023",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
@@ -8,9 +8,19 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@bhargavmahanta/envguard-core": ["../envguard-core/src/index.ts"],
+      "@bhargavmahanta/envguard-reporters": ["../envguard-reporters/src/index.ts"]
+    },
     "outDir": "dist",
-    "rootDir": ".",
     "types": ["node"]
   },
-  "include": ["src", "test/**/*.test.ts", "tsup.config.ts", "vitest.config.ts"]
+  "include": [
+    "src",
+    "test/**/*.test.ts",
+    "../envguard-core/src/picomatch.d.ts",
+    "tsup.config.ts",
+    "vitest.config.ts"
+  ]
 }

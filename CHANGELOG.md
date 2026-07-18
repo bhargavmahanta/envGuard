@@ -1,52 +1,22 @@
 # Changelog
 
-## [1.5.0] - Unreleased
+## [2.0.0-rc.0] - Unreleased
 
 ### Added
 
-- Added structured Kubernetes and Helm detection with seven stable rule IDs.
-- Added `envguard explain <rule-id>`.
-- Added labeled release benchmarks and pinned public-repository benchmark runs.
-
-### Security
-
-- Kubernetes and Helm secret previews remain masked in every output format.
-
-## [1.4.0] - Unreleased
-
-### Added
-
-- Added `envguard init --preset` for official project presets.
-- Added multi-architecture GHCR publishing with SBOM, provenance, and vulnerability scanning.
-- Added current CI recipes and public preset examples.
-
-## [1.4.0] - Unreleased
-
-### Added
-
-- Added `envguard init --preset` for official project presets.
-- Added multi-architecture GHCR publishing with SBOM, provenance, and vulnerability scanning.
-- Added current CI recipes and public preset examples.
-
-## [1.3.0] - Unreleased
-
-### Added
-
-- Added npm workspaces, independent Changesets releases, and four official declarative presets.
-- Added safe `extends` resolution for local and npm presets.
-- Exported `defineConfig`, `defineRule`, `definePreset`, and typed preset errors.
-
-### Security
-
-- Rejects executable and remote presets, cycles, package path escapes, excessive nesting, and duplicate rule IDs.
-
-## [1.2.1] - Unreleased
+- Added independently versioned core, reporter, restricted stdio MCP, and declarative preset packages.
+- Added Kubernetes and Helm rules, rule explanations, fixture benchmarks, and pinned public benchmarks.
+- Added a bundled Node 24 GitHub Action with annotations, summaries, policy failure, and optional SARIF output.
 
 ### Changed
 
-- Updated GitHub Actions to Node 24-based releases and added Node 20, 22, and 24 compatibility checks.
-- Added a non-failing Node 20 end-of-life warning to `doctor`.
-- Added dependency update automation and npm provenance verification guidance.
+- Raised the minimum runtime to Node.js 22 while preserving the primary CLI and SDK facade.
+- Consolidated the unreleased preset, container, Kubernetes, benchmark, MCP, and package-family work into V2.
+
+### Security
+
+- MCP and Action scans force masking and restrict filesystem access to canonical configured roots.
+- Presets remain declarative and reject executable, remote, cyclic, escaping, or duplicate rule definitions.
 
 All notable changes to EnvGuard are documented in this file.
 

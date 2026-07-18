@@ -1,0 +1,59 @@
+name: Release GitHub Action
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-ref:
+        description: Exact branch, tag, or commit containing the release bundle.
+        required: true
+      version:
+        description: EnvGuard version without the leading v.
+        required: true
+      advance-major:
+        description: Advance the mutable v2 tag after creating the immutable tag.
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency: envguard-action-release
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    environment: action-release
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.release-ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test --workspace envguard-action
+      - run: npm run typecheck --workspace envguard-action
+      - run: npm run lint --workspace envguard-action
+      - run: npm run check:dist --workspace envguard-action
+      - run: node scripts/validate-action-release.mjs "${{ inputs.version }}" "${{ inputs.advance-major }}"
+
+      - name: Create immutable Action tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "v${VERSION}" "${GITHUB_SHA}"
+          git push origin "v${VERSION}"
+
+      - name: Advance v2 tag
+        if: inputs.advance-major
+        run: |
+          git tag --force v2 "${GITHUB_SHA}"
+          git push origin refs/tags/v2 --force

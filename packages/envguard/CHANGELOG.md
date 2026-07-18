@@ -1,37 +1,19 @@
 # Changelog
 
-## [1.5.0] - Unreleased
+## 2.0.0-rc.0
 
 ### Added
 
-- Added Kubernetes and Helm rules, multi-document YAML support, and rule explanations.
-
-## [1.4.0] - Unreleased
-
-### Added
-
-- Added `envguard init --preset <node|next|python|docker>`.
-
-## [1.4.0] - Unreleased
-
-### Added
-
-- Added `envguard init --preset <node|next|python|docker>`.
-
-## [1.3.0] - Unreleased
-
-### Added
-
-- Added safe declarative preset composition and public preset definition helpers.
-- Added npm workspace support and packed preset consumers.
-
-## [1.2.1] - Unreleased
+- Added official presets, Kubernetes and Helm rules, rule explanations, and release benchmarks.
 
 ### Changed
 
-- Updated GitHub Actions to Node 24-based releases and added Node 20, 22, and 24 compatibility checks.
-- Added a non-failing Node 20 end-of-life warning to `doctor`.
-- Added dependency update automation and npm provenance verification guidance.
+- Raised the minimum runtime to Node.js 22.
+- Converted the package into a compatibility facade over `envguard-core` and `envguard-reporters`.
+
+### Security
+
+- Preserved default masking, stable rule IDs, root containment, and report schema `1.0.0`.
 
 All notable changes to EnvGuard are documented in this file.
 

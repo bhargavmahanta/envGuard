@@ -1,4 +1,4 @@
-import type { Finding, ScanResult, Severity } from '../types.js';
+import type { Finding, ScanResult, Severity } from '@bhargavmahanta/envguard-core';
 import { prepareResult, type ReporterOptions } from './shared.js';
 
 const ANSI = {

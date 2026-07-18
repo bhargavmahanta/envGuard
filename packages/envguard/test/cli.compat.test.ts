@@ -14,7 +14,7 @@ interface CliResult {
   stderr: string;
 }
 
-function runCli(args: string[], cwd: string): Promise<CliResult> {
+function runCli(args: string[], cwd: string, timeoutMs = 20_000): Promise<CliResult> {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ['--import', tsxImport, cliPath, ...args], {
       cwd,
@@ -23,6 +23,22 @@ function runCli(args: string[], cwd: string): Promise<CliResult> {
     });
     let stdout = '';
     let stderr = '';
+    let settled = false;
+    let timeoutError: Error | undefined;
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      timeoutError = new Error(`CLI subprocess timed out after ${timeoutMs}ms: ${args.join(' ')}`);
+      if (!child.kill()) {
+        settle(() => reject(timeoutError));
+      }
+    }, timeoutMs);
+
+    const settle = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      callback();
+    };
 
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
@@ -32,8 +48,16 @@ function runCli(args: string[], cwd: string): Promise<CliResult> {
     child.stderr.on('data', (chunk: string) => {
       stderr += chunk;
     });
-    child.on('error', reject);
-    child.on('close', (exitCode) => resolve({ exitCode: exitCode ?? 1, stdout, stderr }));
+    child.on('error', (error) => settle(() => reject(error)));
+    child.on('close', (exitCode) => {
+      settle(() => {
+        if (timeoutError) {
+          reject(timeoutError);
+          return;
+        }
+        resolve({ exitCode: exitCode ?? 1, stdout, stderr });
+      });
+    });
   });
 }
 
@@ -50,7 +74,7 @@ describe('CLI compatibility', () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tmpDir, { recursive: true, force: true });
+    await fs.rm(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it('keeps the stable commands available', async () => {
@@ -132,7 +156,7 @@ describe('CLI compatibility', () => {
     expect(JSON.parse(rules.stdout)).toBeInstanceOf(Array);
     expect(JSON.parse(doctor.stdout)).toMatchObject({ tool: 'envguard', ok: true });
     expect(JSON.parse(audit.stdout)).toHaveProperty('stale');
-  });
+  }, 60_000);
 
   it('initializes official presets without overwriting existing configuration', async () => {
     await fs.rm(path.join(tmpDir, 'envguard.config.yml'), { force: true });
@@ -145,5 +169,5 @@ describe('CLI compatibility', () => {
     expect(config).toContain('@bhargavmahanta/envguard-config-next');
     expect(repeated.stdout).toContain('envguard.config.yml: exists');
     expect(invalid.exitCode).toBe(2);
-  });
+  }, 60_000);
 });

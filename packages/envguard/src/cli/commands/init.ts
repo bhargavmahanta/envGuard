@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
-import { InvalidScanOptionsError } from '../../errors.js';
+import { InvalidScanOptionsError } from '@bhargavmahanta/envguard-core';
 import { reportCommandError, type CliContext } from '../context.js';
 
 const PRESETS = ['node', 'next', 'python', 'docker'] as const;

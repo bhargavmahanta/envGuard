@@ -1,0 +1,18 @@
+{
+  "mode": "pre",
+  "tag": "rc",
+  "initialVersions": {
+    "envguard-action": "1.0.0",
+    "@bhargavmahanta/envguard": "1.2.0",
+    "@bhargavmahanta/envguard-config-docker": "0.0.0",
+    "@bhargavmahanta/envguard-config-next": "0.0.0",
+    "@bhargavmahanta/envguard-config-node": "0.0.0",
+    "@bhargavmahanta/envguard-config-python": "0.0.0",
+    "@bhargavmahanta/envguard-core": "0.0.0",
+    "@bhargavmahanta/envguard-mcp": "0.0.0",
+    "@bhargavmahanta/envguard-reporters": "0.0.0"
+  },
+  "changesets": [
+    "v2-package-family"
+  ]
+}

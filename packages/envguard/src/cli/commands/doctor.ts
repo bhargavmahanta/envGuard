@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
-import { VERSION } from '../../defaults.js';
-import { loadConfig } from '../../index.js';
+import { loadConfig } from '../../sdk/loadConfig.js';
+import { VERSION } from '../../version.js';
 import type { CliContext } from '../context.js';
 import { EXIT_CODES } from '../exitCodes.js';
 
@@ -12,11 +12,8 @@ export function registerDoctorCommand(program: Command, context: CliContext): vo
     .option('--json', 'print doctor output as JSON')
     .action(async (options: { json?: boolean }) => {
       const major = Number(process.versions.node.split('.')[0]);
-      const nodeOk = major >= 20;
-      const nodeMessage =
-        major === 20
-          ? `${process.version} supported for EnvGuard v1, but Node 20 is EOL; upgrade to Node 22 or 24`
-          : `${process.version}${nodeOk ? '' : ' requires >=20'}`;
+      const nodeOk = major >= 22;
+      const nodeMessage = `${process.version}${nodeOk ? '' : ' requires >=22'}`;
       const checks: Array<{ name: string; ok: boolean; message: string }> = [
         { name: 'node', ok: nodeOk, message: nodeMessage }
       ];

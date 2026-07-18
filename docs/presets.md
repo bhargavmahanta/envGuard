@@ -6,10 +6,10 @@ project configuration file.
 ## Official Presets
 
 ```bash
-npm install --save-dev @bhargavmahanta/envguard @bhargavmahanta/envguard-config-node
-npm install --save-dev @bhargavmahanta/envguard @bhargavmahanta/envguard-config-next
-npm install --save-dev @bhargavmahanta/envguard @bhargavmahanta/envguard-config-python
-npm install --save-dev @bhargavmahanta/envguard @bhargavmahanta/envguard-config-docker
+npm install --save-dev @bhargavmahanta/envguard@next @bhargavmahanta/envguard-config-node@next
+npm install --save-dev @bhargavmahanta/envguard@next @bhargavmahanta/envguard-config-next@next
+npm install --save-dev @bhargavmahanta/envguard@next @bhargavmahanta/envguard-config-python@next
+npm install --save-dev @bhargavmahanta/envguard@next @bhargavmahanta/envguard-config-docker@next
 ```
 
 ```yaml

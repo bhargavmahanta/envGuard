@@ -13,7 +13,7 @@ EnvGuard supports five report formats:
 ## JSON
 
 ```bash
-npx @bhargavmahanta/envguard scan . --format json --output envguard-report.json
+npx @bhargavmahanta/envguard@next scan . --format json --output envguard-report.json
 ```
 
 JSON reports include `schemaVersion: "1.0.0"` and stable finding fingerprints.
@@ -21,19 +21,19 @@ JSON reports include `schemaVersion: "1.0.0"` and stable finding fingerprints.
 ## Markdown
 
 ```bash
-npx @bhargavmahanta/envguard scan . --format markdown --output envguard-report.md
+npx @bhargavmahanta/envguard@next scan . --format markdown --output envguard-report.md
 ```
 
 ## SARIF
 
 ```bash
-npx @bhargavmahanta/envguard scan . --format sarif --output envguard.sarif
+npx @bhargavmahanta/envguard@next scan . --format sarif --output envguard.sarif
 ```
 
 Upload to GitHub code scanning:
 
 ```yaml
-- run: npx @bhargavmahanta/envguard scan . --format sarif --output envguard.sarif
+- run: npx @bhargavmahanta/envguard@next scan . --format sarif --output envguard.sarif
 - uses: github/codeql-action/upload-sarif@v3
   with:
     sarif_file: envguard.sarif
@@ -42,7 +42,7 @@ Upload to GitHub code scanning:
 ## GitHub Annotations
 
 ```bash
-npx @bhargavmahanta/envguard scan . --format github
+npx @bhargavmahanta/envguard@next scan . --format github
 ```
 
 All report formats mask sensitive values by default.

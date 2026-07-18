@@ -1,4 +1,8 @@
-export { createScanner } from './core/createScanner.js';
+export { createScanner } from './sdk/createScanner.js';
+export { loadConfig } from './sdk/loadConfig.js';
+export { scan } from './sdk/scan.js';
+export { VERSION } from './version.js';
+
 export {
   ConfigError,
   EnvGuardError,
@@ -8,11 +12,12 @@ export {
   PresetValidationError,
   ScanAbortedError,
   TargetAccessError,
-  TargetNotFoundError
-} from './errors.js';
-export { defineConfig, loadConfig } from './config.js';
-export { definePreset, defineRule } from './presets.js';
-export { scan, shouldFail } from './scanner.js';
+  TargetNotFoundError,
+  defineConfig,
+  definePreset,
+  defineRule,
+  shouldFail
+} from '@bhargavmahanta/envguard-core';
 
 export type {
   Confidence,
@@ -29,4 +34,4 @@ export type {
   ScanResult,
   ScanSummary,
   Severity
-} from './types.js';
+} from '@bhargavmahanta/envguard-core';

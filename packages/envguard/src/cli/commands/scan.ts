@@ -2,11 +2,18 @@ import path from 'node:path';
 import chalk from 'chalk';
 import { Command, InvalidArgumentError } from 'commander';
 import ora from 'ora';
-import { defaultBaselinePath, writeBaseline } from '../../baseline.js';
-import { getChangedFiles, getStagedFiles } from '../../git.js';
-import { loadConfig, scan } from '../../index.js';
-import { renderReport } from '../../reporter.js';
-import { SEVERITIES, type OutputFormat, type Severity } from '../../types.js';
+import {
+  defaultBaselinePath,
+  getChangedFiles,
+  getStagedFiles,
+  SEVERITIES,
+  writeBaseline,
+  type OutputFormat,
+  type Severity
+} from '@bhargavmahanta/envguard-core';
+import { renderReport } from '@bhargavmahanta/envguard-reporters';
+import { loadConfig } from '../../sdk/loadConfig.js';
+import { scan } from '../../sdk/scan.js';
 import { reportCommandError, type CliContext } from '../context.js';
 import { EXIT_CODES } from '../exitCodes.js';
 import { writeOutputFile } from '../output.js';
