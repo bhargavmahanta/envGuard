@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import { z } from 'zod';
 import { CONFIG_FILENAMES, DEFAULT_CONFIG } from './defaults.js';
 import { ConfigError } from './errors.js';

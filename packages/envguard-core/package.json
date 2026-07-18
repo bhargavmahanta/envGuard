@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "fast-glob": "^3.3.2",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^5.2.1",
     "picomatch": "^4.0.5",
     "zod": "^4.4.3"
   },
