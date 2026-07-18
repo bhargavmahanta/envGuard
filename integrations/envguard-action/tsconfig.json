@@ -10,7 +10,9 @@
     "baseUrl": ".",
     "paths": {
       "@bhargavmahanta/envguard": ["../../packages/envguard/src/index.ts"],
-      "@bhargavmahanta/envguard/reporters": ["../../packages/envguard/src/reporters/index.ts"]
+      "@bhargavmahanta/envguard/reporters": ["../../packages/envguard/src/reporters/index.ts"],
+      "@bhargavmahanta/envguard-core": ["../../packages/envguard-core/src/index.ts"],
+      "@bhargavmahanta/envguard-reporters": ["../../packages/envguard-reporters/src/index.ts"]
     },
     "types": ["node"]
   },

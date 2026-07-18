@@ -33,8 +33,6 @@ jobs:
 
       - run: npm test
 
-      - run: npm run build
-
       - name: Run sample scan
         run: node packages/envguard/dist/cli.js scan examples/vulnerable-project --format json --output sample-report.json
 
@@ -62,4 +60,3 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build

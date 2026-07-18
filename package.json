@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspace @bhargavmahanta/envguard-core && npm run build --workspace @bhargavmahanta/envguard-reporters && npm run build --workspace @bhargavmahanta/envguard && npm run build --workspace @bhargavmahanta/envguard-mcp && npm run build --workspace envguard-action",
+    "pretest": "npm run build",
     "test": "npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
