@@ -4,8 +4,8 @@ import path from 'node:path';
 
 const version = process.argv[2];
 const advanceMajor = process.argv[3] === 'true';
-if (!/^2\.0\.0(?:-rc\.\d+)?$/.test(version ?? '')) {
-  throw new Error('Action version must be 2.0.0 or 2.0.0-rc.N.');
+if (!/^2\.\d+\.\d+(?:-rc\.\d+)?$/.test(version ?? '')) {
+  throw new Error('Action version must be a stable V2 version or V2 release candidate.');
 }
 
 const manifest = JSON.parse(
