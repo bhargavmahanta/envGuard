@@ -7,7 +7,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "@bhargavmahanta/envguard": ["../../packages/envguard/src/index.ts"],
       "@bhargavmahanta/envguard/reporters": ["../../packages/envguard/src/reporters/index.ts"],
