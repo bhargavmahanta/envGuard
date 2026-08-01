@@ -43,7 +43,7 @@
   "dependencies": {
     "@bhargavmahanta/envguard-core": "^1.0.0",
     "@bhargavmahanta/envguard-reporters": "^1.0.0",
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
