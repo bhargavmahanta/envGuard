@@ -46,11 +46,11 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^26.1.1",
-    "eslint": "^10.7.0",
+    "@types/node": "^26.1.2",
+    "eslint": "^10.8.0",
     "tsup": "^8.1.0",
-    "typescript": "5.9.3",
-    "typescript-eslint": "^8.64.0",
+    "typescript": "7.0.2",
+    "typescript-eslint": "^8.66.0",
     "vitest": "^4.1.10"
   },
   "engines": {
