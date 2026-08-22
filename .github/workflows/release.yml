@@ -33,7 +33,7 @@ jobs:
       - run: node scripts/assert-release-channel.mjs --stable
       - run: npm run release:dry
 
-      - uses: changesets/action@v1
+      - uses: changesets/action@v2
         id: changesets
         with:
           version: npm run release:version
